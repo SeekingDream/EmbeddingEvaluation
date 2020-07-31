@@ -1,0 +1,1 @@
+https://github.com/zhezhaoa/ngram2vec
