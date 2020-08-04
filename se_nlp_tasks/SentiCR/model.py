@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
-class RNN(nn.Module):
+class SentiCRModel(nn.Module):
 
     def __init__(self, vocab_size, embed_size, num_output, rnn_model='LSTM', use_last=True, embedding_tensor=None,
                  padding_index=0, hidden_size=64, num_layers=1, batch_first=True):
@@ -22,7 +22,7 @@ class RNN(nn.Module):
             batch_first: batch first option
         """
 
-        super(RNN, self).__init__()
+        super(SentiCRModel, self).__init__()
         self.use_last = use_last
         # embedding
         self.encoder = None
@@ -36,14 +36,13 @@ class RNN(nn.Module):
 
         # rnn module
         if rnn_model == 'LSTM':
-            self.rnn = nn.LSTM( input_size=embed_size, hidden_size=hidden_size, num_layers=num_layers, dropout=0.5,
+            self.rnn = nn.LSTM(input_size=embed_size, hidden_size=hidden_size, num_layers=num_layers, dropout=0.5,
                                 batch_first=True, bidirectional=True)
         elif rnn_model == 'GRU':
-            self.rnn = nn.GRU( input_size=embed_size, hidden_size=hidden_size, num_layers=num_layers, dropout=0.5,
+            self.rnn = nn.GRU(input_size=embed_size, hidden_size=hidden_size, num_layers=num_layers, dropout=0.5,
                                 batch_first=True, bidirectional=True)
         else:
             raise LookupError(' only support LSTM and GRU')
-
 
         self.bn2 = nn.BatchNorm1d(hidden_size*2)
         self.fc = nn.Linear(hidden_size*2, num_output)
@@ -52,7 +51,7 @@ class RNN(nn.Module):
         '''
         Args:
             x: (batch, time_step, input_size)
-
+            seq_lengths: (input_length)
         Returns:
             num_output size
         '''
@@ -73,7 +72,7 @@ class RNN(nn.Module):
             col_indices = col_indices.cuda()
 
         if self.use_last:
-            last_tensor=out_rnn[row_indices, col_indices, :]
+            last_tensor = out_rnn[row_indices, col_indices, :]
         else:
             # use mean
             last_tensor = out_rnn[row_indices, :, :]

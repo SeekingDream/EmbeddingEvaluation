@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 import random
 import util as ut
+from torch.utils.data import DataLoader
 
 
 class TextClassDataLoader(object):
-
     def __init__(self, path_file, word_to_index, batch_size=32):
         """
 

@@ -6,12 +6,13 @@ import torch.nn as nn
 class BasicEmbedding(nn.Module):
     __metaclass__ = ABCMeta
 
-    def __init__(self, dataset, vocab, vec_dim, epoch):
+    def __init__(self, file_name, dataset, vocab, vec_dim, epoch):
         super(BasicEmbedding, self).__init__()
         self.dataset = dataset
         self.vocab = vocab
         self.vec_dim = vec_dim
         self.epoch = epoch
+        self.file_name = file_name
 
     @abstractmethod
     def generate_embedding(self):

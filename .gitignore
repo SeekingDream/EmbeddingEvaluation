@@ -1,0 +1,9 @@
+dataset/
+model_weight/
+Result/
+__pycache__/
+.idea/
+data/
+*.pyc
+.h5
+.vec
