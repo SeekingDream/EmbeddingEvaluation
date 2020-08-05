@@ -3,8 +3,6 @@ import os
 from utils import parse_statement, parse_source
 
 
-
-
 def main():
     err_num = 0
     dir_name = './dataset/raw_code/'
