@@ -36,7 +36,7 @@ class VocabBuilder(object):
         print('Original Vocab size:{}'.format(len(word_count)))
         return word_count
 
-    def get_word_index(self, min_sample=1, padding_marker='__PADDING__', unknown_marker='__UNK__',):
+    def get_word_index(self, min_sample=1, padding_marker='____PAD____', unknown_marker='____UNKNOW____',):
         """
         create word-to-index mapping. Padding and unknown are added to last 2 indices.
 
@@ -70,7 +70,7 @@ class GloveVocabBuilder(object):
         self.vocab = None
         self.path_glove = path_glove
 
-    def get_word_index(self, padding_marker='__PADDING__', unknown_marker='__UNK__',):
+    def get_word_index(self, padding_marker='____PAD____', unknown_marker='____UNKNOW____',):
         _vocab, _vec = torchwordemb.load_glove_text(self.path_glove)
         vocab = {padding_marker:0, unknown_marker:1}
         for tkn, indx in _vocab.items():

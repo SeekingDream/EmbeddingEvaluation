@@ -17,6 +17,7 @@ def modify_vec(file_name):
     tmp_vec = np.random.rand(2, dim)
     vec = np.concatenate([tmp_vec, vec])
     torch.save([word2index, vec], file_name)
+    print('successful', file_name)
 
 
 def main():
