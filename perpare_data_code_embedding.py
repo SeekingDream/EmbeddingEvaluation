@@ -13,15 +13,16 @@ def main():
         os.mkdir(out_dir)
     for project in os.listdir(dir_name):
         sub_dir = os.path.join(dir_name, project)
-        sub_out = os.path.join(out_dir, project)
-        if not os.path.isdir(sub_out):
-            os.mkdir(sub_out)
+        # sub_out = os.path.join(out_dir, project)
+        # if not os.path.isdir(sub_out):
+        #     os.mkdir(sub_out)
         for file_name in os.listdir(sub_dir):
             try:
                 with open(os.path.join(sub_dir, file_name), 'r') as f:
                     source_code = f.readlines()
                 new_source_code = parse_source(source_code)
-                with open(os.path.join(sub_out, file_name), 'w') as f:
+                # with open(os.path.join(sub_out, file_name), 'w') as f:
+                with open(os.path.join(out_dir, file_name), 'w') as f:
                     f.writelines(new_source_code)
                     print('finish', project, file_name)
             except:
