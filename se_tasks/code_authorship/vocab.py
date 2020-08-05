@@ -63,7 +63,7 @@ class VocabBuilder(object):
         return self.word_to_index, None
 
 
-class GloveVocabBuilder(object) :
+class GloveVocabBuilder(object):
 
     def __init__(self, path_glove):
         self.vec = None

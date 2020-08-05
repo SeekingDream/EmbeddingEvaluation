@@ -84,6 +84,8 @@ def main():
     else:
         raise ValueError('unsupported type')
     if embed is not None:
+        if type(embed) is np.ndarray:
+            embed = torch.tensor(embed)
         assert embed.size()[1] == args.embedding_dim
     if not os.path.exists('./result'):
         os.mkdir('./result')
@@ -153,11 +155,11 @@ if __name__ == '__main__':
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
-    parser.add_argument('--embedding_path', type=str, default='d1_author_1', help='model name')
+    parser.add_argument('--embedding_path', type=str, default='../../embedding_vec/code_vec/doc2vec.vec')
     parser.add_argument('--train_data', type=str, default='./dataset/train.tsv', help='model name')
     parser.add_argument('--test_data', type=str, default='./dataset/test.tsv', help='model name')
-    parser.add_argument('--embedding_type', type=int, default=1, choices=[0, 1, 2])
-    parser.add_argument('--experiment_name', type=str, default='best_case')
+    parser.add_argument('--embedding_type', type=int, default=0, choices=[0, 1, 2])
+    parser.add_argument('--experiment_name', type=str, default='doc_2vec')
 
     args = parser.parse_args()
     main()

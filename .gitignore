@@ -5,5 +5,5 @@ __pycache__/
 .idea/
 data/
 *.pyc
-.h5
-.vec
+*.h5
+*.vec

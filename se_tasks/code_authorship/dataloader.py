@@ -54,7 +54,7 @@ class TextClassDataLoader(object):
                 if word in self.word_to_index:
                     indices.append(self.word_to_index[word])
                 else:
-                    indices.append(self.word_to_index['__UNK__'])
+                    indices.append(self.word_to_index['____UNKNOW____'])
             return indices
 
         return indexify
