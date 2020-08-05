@@ -38,20 +38,27 @@ class OutlierDetection:
 
 
 class SemanticCosine:
-    def __init__(self, vec_list, sampling_num=5000):
+    def __init__(self, vec_list, index2word, word2index, sampling_num=5000):
         self.vec_list = vec_list
+        self.index2word = index2word
+        self.word2index = word2index
         self.vec_num = len(self.vec_list)
         self.sampling_num = sampling_num
         self.vocab_size = len(self.vec_list[0])
 
     def calculate_score(self):
         p_table = []
+        common_tk = self.get_common_tk()
         for i in range(self.sampling_num):
-            st, ed, orig = np.random.randint(0, self.vocab_size, 3)
+            st, ed, orig = np.random.randint(0, len(common_tk), 3)
+            st, ed, orig = common_tk[st], common_tk[ed], common_tk[orig]
             p_list = []
             for j in range(self.vec_num):
-                off_1 = self.vec_list[j][st] - self.vec_list[j][orig]
-                off_2 = self.vec_list[j][ed] - self.vec_list[j][orig]
+                st_index = self.word2index[j][st]
+                ed_index = self.word2index[j][ed]
+                orig_index = self.word2index[j][orig]
+                off_1 = self.vec_list[j][st_index] - self.vec_list[j][orig_index]
+                off_2 = self.vec_list[j][ed_index] - self.vec_list[j][orig_index]
                 p1 = cosine_similarity([off_1, off_2])
                 p1 = p1[0][1]
                 p_list.append(p1)
@@ -59,3 +66,17 @@ class SemanticCosine:
         detector = OutlierDetection(p_table)
         res = detector.pauta_criterion()
         print(np.sum(res, 0, dtype=np.float) / self.sampling_num)
+
+    def is_contain(self, tk):
+        for dict_map in self.word2index:
+            if tk not in dict_map:
+                return False
+        return True
+
+    def get_common_tk(self):
+        res = []
+        for tk in self.word2index[0]:
+            if self.is_contain(tk):
+                res.append(tk)
+        return res
+

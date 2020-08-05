@@ -11,11 +11,14 @@ from torch import nn
 import torch.backends.cudnn as cudnn
 import matplotlib.pyplot as plt
 
-from se_tasks.code_authorship import VocabBuilder
-from se_tasks.code_authorship import TextClassDataLoader
-from se_tasks.code_authorship import RNN
-from se_tasks.code_authorship import AverageMeter, accuracy
-from se_tasks.code_authorship import adjust_learning_rate
+from se_tasks.code_authorship.scripts import VocabBuilder
+from se_tasks.code_authorship.scripts import TextClassDataLoader
+from se_tasks.code_authorship.scripts import RNN
+from se_tasks.code_authorship.scripts import AverageMeter, accuracy
+from se_tasks.code_authorship.scripts import adjust_learning_rate
+
+from utils import set_random_seed
+
 
 
 def train_model(train_loader, model, criterion, optimizer):
@@ -79,19 +82,19 @@ def main():
     elif args.embedding_type == 2:
         v_builder = VocabBuilder(path_file=train_path)
         d_word_index, embed = v_builder.get_word_index(min_sample=args.min_samples)
-        embed = torch.randn([len(d_word_index), args.embedding_dim])
+        embed = torch.randn([len(d_word_index), args.embedding_dim]).cuda()
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
     if embed is not None:
         if type(embed) is np.ndarray:
-            embed = torch.tensor(embed)
+            embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == args.embedding_dim
     if not os.path.exists('./result'):
         os.mkdir('./result')
 
     train_loader = TextClassDataLoader(train_path, d_word_index, batch_size=args.batch)
-    val_loader = TextClassDataLoader(test_path, d_word_index, batch_size=args.batch)
+    val_loader = TextClassDataLoader(test_path, d_word_index, batch_size=1)
     vocab_size = len(d_word_index)
     model = RNN(
         vocab_size=vocab_size,
@@ -155,11 +158,12 @@ if __name__ == '__main__':
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
-    parser.add_argument('--embedding_path', type=str, default='../../embedding_vec/code_vec/doc2vec.vec')
+    parser.add_argument('--embedding_path', type=str, default='../../embedding_vec/100_1/fasttext.vec')
     parser.add_argument('--train_data', type=str, default='./dataset/train.tsv', help='model name')
     parser.add_argument('--test_data', type=str, default='./dataset/test.tsv', help='model name')
-    parser.add_argument('--embedding_type', type=int, default=1, choices=[0, 1, 2])
-    parser.add_argument('--experiment_name', type=str, default='doc_2vec')
+    parser.add_argument('--embedding_type', type=int, default=0, choices=[0, 1, 2])
+    parser.add_argument('--experiment_name', type=str, default='code2vec')
 
     args = parser.parse_args()
+    set_random_seed(10)
     main()

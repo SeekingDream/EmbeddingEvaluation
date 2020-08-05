@@ -1,5 +1,6 @@
 dataset/
 model_weight/
+embedding_vec/
 Result/
 __pycache__/
 .idea/

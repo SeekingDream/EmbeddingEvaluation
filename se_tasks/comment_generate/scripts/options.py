@@ -7,7 +7,7 @@ def train_opts(parser):
         help='path to a train data')
     group.add_argument('--test_data', default='../dataset/test.tsv',
         help='path to a validation data')
-    group.add_argument('--batch-size', type=int, default=32, 
+    group.add_argument('--batch', type=int, default=128,
         help='batch size')
     group.add_argument('--savedir', default='./checkpoints', 
         help='path to save models')
@@ -34,7 +34,7 @@ def translate_opts(parser):
         help='model file for translation')
     group.add_argument('--input', default='./sample_data/sample_test.txt',
         help='input file')
-    group.add_argument('--batch-size', type=int, default=32,
+    group.add_argument('--batch', type=int, default=32,
         help='batch size')
     group.add_argument('--maxlen', type=int, default=100,
         help='maximum length of output sentence')

@@ -9,18 +9,22 @@ from collections import OrderedDict
 
 from tqdm import tqdm
 
-from torchtext import data
-from torchtext import datasets
-from torchtext.vocab import Vectors
+# from torchtext import data
+# from torchtext import vocab
+# from torchtext import datasets
+# from torchtext.vocab import Vectors
 from torchtext.data.metrics import bleu_score
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import numpy as np
 
 from se_tasks.comment_generate.scripts.options import train_opts
 from se_tasks.comment_generate.scripts.options import model_opts
 from se_tasks.comment_generate.scripts.model import Seq2seqAttn
+from se_tasks.comment_generate.scripts.vocab import VocabBuilder
+from se_tasks.comment_generate.scripts.dataloader import TextClassDataLoader
 
 
 class Trainer(object):
@@ -36,11 +40,10 @@ class Trainer(object):
     def get_lr(self):
         return self.optimizer.param_groups[0]['lr']
 
-    def step(self, samples, tf_ratio):
+    def step(self, src, tar, src_len, tar_len, tf_ratio):
         self.optimizer.zero_grad()
-        bsz = samples.src.size(1)
-        outs = self.model(samples.src, samples.tgt, tf_ratio)
-        loss = self.criterion(outs.view(-1, outs.size(2)), samples.tgt.view(-1))
+        outs = self.model(src, src_len, tar, tar_len, tf_ratio)
+        loss = self.criterion(outs.view(-1, outs.size(2)), tar.view(-1))
 
         if self.model.training:
             loss.backward()
@@ -72,51 +75,44 @@ def save_field(savedir, fields):
 
 def main(args):
     device = torch.device('cuda' if args.gpu else 'cpu')
+    train_path, test_path = args.train_data, args.test_data
 
-    # load data and construct vocabulary dictionary
-    SRC = data.Field(lower=True)
-    TGT = data.Field(lower=True, eos_token='<eos>')
-    fields = [('src', SRC), ('tgt', TGT)]
+    v_builder = VocabBuilder(path_file=train_path)
+    src_word_index, embed, tar_word_index, embed = v_builder.get_word_index()
 
-    train_data = data.TabularDataset(
-        path=args.train_data,
-        format='tsv',
-        fields=fields,
+    pre_embedding_path = args.embed_file
+    if args.embed_type == 0:
+        src_word_index, embed = torch.load(pre_embedding_path)
+        print('load existing embedding vectors, name is ', pre_embedding_path)
+    elif args.embed_type == 1:
+        print('create new embedding vectors, training from scratch')
+    elif args.embed_type == 2:
+        embed = torch.randn([len(src_word_index), args.embedding_dim]).cuda()
+        print('create new embedding vectors, training the random vectors')
+    else:
+        raise ValueError('unsupported type')
+    if embed is not None:
+        if type(embed) is np.ndarray:
+            embed = torch.tensor(embed, dtype=torch.float).cuda()
+        assert embed.size()[1] == args.embedding_dim
+
+    if not os.path.exists('../result'):
+        os.mkdir('../result')
+
+    train_loader = TextClassDataLoader(train_path, src_word_index, tar_word_index, batch_size=args.batch)
+    val_loader = TextClassDataLoader(test_path, src_word_index, tar_word_index, batch_size=args.batch)
+
+    model = Seq2seqAttn(
+        args,
+        len(src_word_index),
+        len(tar_word_index),
+        device, embed
+    ).to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr,
     )
-
-    valid_data = data.TabularDataset(
-        path=args.test_data,
-        format='tsv',
-        fields=fields,
-    )
-
-    SRC.build_vocab(train_data, min_freq=args.src_min_freq)
-    TGT.build_vocab(train_data, min_freq=args.tgt_min_freq)
-
-    if not os.path.exists(args.savedir):
-        os.mkdir(args.savedir)
-
-    # save field and vocabulary
-    for field in fields:
-        save_field(args.savedir, field)
-        save_vocab(args.savedir, field)
-
-    # set iterator
-    train_iter, valid_iter = data.BucketIterator.splits(
-        (train_data, valid_data),
-        batch_size=args.batch_size,
-        sort_within_batch=True,
-        sort_key=lambda x: len(x.src),
-        repeat=False,
-        device=device
-    )
-
-    model = Seq2seqAttn(args, fields, device).to(device)
-    print(model)
-    print('')
-
-    criterion = nn.CrossEntropyLoss(ignore_index=TGT.vocab.stoi['<pad>'])
-    optimizer = optim.SGD(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min')
     trainer = Trainer(model, criterion, optimizer, scheduler, args.clip)
 
@@ -128,58 +124,37 @@ def main(args):
     while epoch < max_epoch and trainer.n_updates < max_update \
             and args.min_lr < trainer.get_lr():
         # training
-        with tqdm(train_iter, dynamic_ncols=True) as pbar:
-            train_loss = 0.0
-            trainer.model.train()
-            for samples in pbar:
-                bsz = samples.src.size(1)
-                loss = trainer.step(samples, args.tf_ratio)
-                train_loss += loss.item()
-
-                # setting of progressbar
-                pbar.set_description(f"epoch {str(epoch).zfill(3)}")
-                progress_state = OrderedDict(
-                    loss=loss.item(),
-                    ppl=math.exp(loss.item()),
-                    bsz=len(samples),
-                    lr=trainer.get_lr(),
-                    clip=args.clip,
-                    num_updates=trainer.n_updates)
-                pbar.set_postfix(progress_state)
-        train_loss /= len(train_iter)
-
-        print(f"| epoch {str(epoch).zfill(3)} | train ", end="")
-        print(f"| loss {train_loss:.{4}} ", end="")
-        print(f"| ppl {math.exp(train_loss):.{4}} ", end="")
-        print(f"| lr {trainer.get_lr():.1e} ", end="")
-        print(f"| clip {args.clip} ", end="")
-        print(f"| num_updates {trainer.n_updates} |")
+        trainer.model.train()
+        train_loss = 0.0
+        for (src, tar, src_len, tar_len) in train_loader:
+            loss = trainer.step(src, tar, src_len, tar_len, args.tf_ratio)
+            train_loss += loss.item()
+        train_loss /= train_loader.batch_size
 
         # validation
         valid_loss = 0.0
         trainer.model.eval()
-        for samples in valid_iter:
-            bsz = samples.src.size(1)
-            loss = trainer.step(samples, tf_ratio=0.0)
+        for (src, tar, src_len, tar_len) in val_loader:
+            loss = trainer.step(src, tar, src_len, tar_len, args.tf_ratio)
             valid_loss += loss.item()
 
-        valid_loss /= len(valid_iter)
+        valid_loss /= val_loader.batch_size
 
-        print(f"| epoch {str(epoch).zfill(3)} | valid ", end="")
-        print(f"| loss {valid_loss:.{4}} ", end="")
-        print(f"| ppl {math.exp(valid_loss):.{4}} ", end="")
-        print(f"| lr {trainer.get_lr():.1e} ", end="")
-        print(f"| clip {args.clip} ", end="")
-        print(f"| num_updates {trainer.n_updates} |")
-
-        # saving model
-        save_vars = {"train_args": args,
-                     "state_dict": model.state_dict()}
-
-        if valid_loss < best_loss:
-            best_loss = valid_loss
-            save_model(save_vars, 'checkpoint_best.pt')
-        save_model(save_vars, "checkpoint_last.pt")
+        # print(f"| epoch {str(epoch).zfill(3)} | valid ", end="")
+        # print(f"| loss {valid_loss:.{4}} ", end="")
+        # print(f"| ppl {math.exp(valid_loss):.{4}} ", end="")
+        # print(f"| lr {trainer.get_lr():.1e} ", end="")
+        # print(f"| clip {args.clip} ", end="")
+        # print(f"| num_updates {trainer.n_updates} |")
+        #
+        # # saving model
+        # save_vars = {"train_args": args,
+        #              "state_dict": model.state_dict()}
+        #
+        # if valid_loss < best_loss:
+        #     best_loss = valid_loss
+        #     save_model(save_vars, 'checkpoint_best.pt')
+        # save_model(save_vars, "checkpoint_last.pt")
 
         # update
         trainer.scheduler.step(valid_loss)
