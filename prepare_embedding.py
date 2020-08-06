@@ -5,8 +5,8 @@ from utils import parse_statement, parse_source
 
 def main():
     err_num = 0
-    dir_name = './dataset/raw_code/'
-    out_dir = './dataset/code_embedding/'
+    dir_name = 'dataset/raw_code/'
+    out_dir = 'dataset/code_embedding/'
     if not os.path.isdir(out_dir):
         os.mkdir(out_dir)
     for project in os.listdir(dir_name):

@@ -11,6 +11,7 @@ import argparse
 from utils import set_random_seed
 import numpy as np
 import os
+from tqdm import tqdm
 
 
 def my_collate(batch):
@@ -29,7 +30,10 @@ def my_collate(batch):
     return (sts, paths, eds), y, length
 
 
-def train_model(tk_path, train_path, test_path, embed_dim, embed_type, vec_path, experiment_name):
+def train_model(
+    tk_path, train_path, test_path, embed_dim, embed_type, 
+    vec_path, experiment_name, train_batch
+):
     with open(tk_path, 'rb') as f:
         token2index, path2index, func2index = pickle.load(f)
         embed = None
@@ -49,24 +53,27 @@ def train_model(tk_path, train_path, test_path, embed_dim, embed_type, vec_path,
         if type(embed) is np.ndarray:
             embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == embed_dim
-    if not os.path.exists('../result'):
-        os.mkdir('../result')
+    if not os.path.exists('se_tasks/code_summary/result'):
+        os.mkdir('se_tasks/code_summary/result')
 
     nodes_dim, paths_dim, output_dim = len(token2index), len(path2index), len(func2index)
 
     model = Code2Vec(nodes_dim + 2, paths_dim + 2, embed_dim, output_dim + 1, embed)
     criterian = nn.CrossEntropyLoss()  # loss
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr,
-                                 weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()), 
+        lr=args.lr,
+        weight_decay=args.weight_decay
+    )
 
     train_dataset = CodeLoader(train_path)
-    train_loader = DataLoader(train_dataset, batch_size=256, collate_fn=my_collate)
+    train_loader = DataLoader(train_dataset, batch_size=train_batch, collate_fn=my_collate)
     print('train data size is ', len(train_dataset))
 
     #test_dataset = CodeLoader(test_path)
     #test_loader = DataLoader(test_dataset, batch_size=1000, collate_fn=my_collate)
 
-    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     for epoch in range(args.epochs):
@@ -84,7 +91,11 @@ def train_model(tk_path, train_path, test_path, embed_dim, embed_type, vec_path,
             pos, pred_y = torch.max(pred_y, 1)
             acc += torch.sum(pred_y == y)
         ed_time = datetime.datetime.now()
-        print('epoch', epoch, 'acc:', acc.float().item() / len(train_dataset), 'cost time', ed_time - st_time)
+        print(
+            'epoch', epoch, 
+            'acc:', acc.float().item() / len(train_dataset), 
+            'cost time', ed_time - st_time
+        )
 
 
 def main(args_set):
@@ -95,7 +106,11 @@ def main(args_set):
     embed_type = args_set.embed_type
     vec_path = args_set.embed_path
     experiment_name = args.experiment_name
-    train_model(tk_path, train_path, test_path, embed_dim, embed_type, vec_path, experiment_name)
+    train_batch = args.batch
+    train_model(
+        tk_path, train_path, test_path, embed_dim, embed_type, 
+        vec_path, experiment_name, train_batch
+    )
 
 
 if __name__ == '__main__':
@@ -113,10 +128,10 @@ if __name__ == '__main__':
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
-    parser.add_argument('--embed_path', type=str, default='../../embedding_vec/100_1/fasttext.vec')
-    parser.add_argument('--train_data', type=str, default='../data/java-small-preprocess/train.pkl')
-    parser.add_argument('--test_data', type=str, default='../data/java-small-preprocess/val.pkl')
-    parser.add_argument('--tk_path', type=str, default='../data/java-small-preprocess/tk.pkl')
+    parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
+    parser.add_argument('--train_data', type=str, default='dataset/java-small-preprocess/train.pkl')
+    parser.add_argument('--test_data', type=str, default='dataset/java-small-preprocess/val.pkl')
+    parser.add_argument('--tk_path', type=str, default='dataset/java-small-preprocess/tk.pkl')
     parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
