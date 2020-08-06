@@ -10,6 +10,7 @@ import torch
 from torch import nn
 import torch.backends.cudnn as cudnn
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from se_tasks.code_authorship.scripts import VocabBuilder
 from se_tasks.code_authorship.scripts import TextClassDataLoader
@@ -86,10 +87,12 @@ def main():
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
+
     if embed is not None:
         if type(embed) is np.ndarray:
             embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == args.embedding_dim
+
     if not os.path.exists('se_tasks/code_authorship/result'):
         os.mkdir('se_tasks/code_authorship/result')
 
@@ -122,7 +125,7 @@ def main():
     # training and testing
     t1 = datetime.datetime.now()
     acc_curve = []
-    for epoch in range(1, args.epochs + 1):
+    for epoch in tqdm(range(1, args.epochs + 1)):
         st = datetime.datetime.now()
         adjust_learning_rate(args.lr, optimizer, epoch)
         train_model(train_loader, model, criterion, optimizer)
@@ -130,10 +133,11 @@ def main():
         ed = datetime.datetime.now()
         print(epoch, ' epoch cost time', ed - st, 'accuracy is', res.item())
         acc_curve.append(res.item())
-    # plt.plot(acc_curve)
-    # plt.show()
+
+    plt.plot(acc_curve)
+    plt.show()
     t2 = datetime.datetime.now()
-    save_name = './result/' + args.experiment_name + '.h5'
+    save_name = 'se_tasks/code_authorship/result/' + args.experiment_name + '.h5'
     res = {
         'word2index': d_word_index,
         'model': model.state_dict(),
@@ -160,9 +164,9 @@ if __name__ == '__main__':
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
-    parser.add_argument('--embedding_path', type=str, default='../../embedding_vec/100_1/fasttext.vec')
-    parser.add_argument('--train_data', type=str, default='./dataset/train.tsv', help='model name')
-    parser.add_argument('--test_data', type=str, default='./dataset/test.tsv', help='model name')
+    parser.add_argument('--embedding_path', type=str, default='embedding_vec100_1/fasttext.vec')
+    parser.add_argument('--train_data', type=str, default='se_tasks/code_authorship/dataset/train.tsv', help='model name')
+    parser.add_argument('--test_data', type=str, default='se_tasks/code_authorship/dataset/test.tsv', help='model name')
     parser.add_argument('--embedding_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
