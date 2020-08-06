@@ -8,7 +8,7 @@ else
 fi
 
 
-EPOCHS=5
+EPOCHS=20
 BATCH=128
 LR=0.005
 

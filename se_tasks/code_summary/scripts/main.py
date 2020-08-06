@@ -136,5 +136,5 @@ if __name__ == '__main__':
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
     args = parser.parse_args()
-    set_random_seed(10)
+    # set_random_seed(10)
     main(args)
