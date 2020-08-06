@@ -3,7 +3,7 @@ import torch
 import pandas as pd
 import numpy as np
 import random
-import util as ut
+import se_tasks.code_authorship.scripts.util as ut
 from torch.utils.data import DataLoader
 
 
