@@ -90,8 +90,8 @@ def main():
         if type(embed) is np.ndarray:
             embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == args.embedding_dim
-    if not os.path.exists('./result'):
-        os.mkdir('./result')
+    if not os.path.exists('se_tasks/code_authorship/result'):
+        os.mkdir('se_tasks/code_authorship/result')
 
     train_loader = TextClassDataLoader(train_path, d_word_index, batch_size=args.batch)
     val_loader = TextClassDataLoader(test_path, d_word_index, batch_size=1)
@@ -107,8 +107,10 @@ def main():
         num_layers=args.layers,
         batch_first=True
     )
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr,
-                                 weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr,
+        weight_decay=args.weight_decay
+    )
     criterion = nn.CrossEntropyLoss()
 
     if args.cuda:
@@ -128,8 +130,8 @@ def main():
         ed = datetime.datetime.now()
         print(epoch, ' epoch cost time', ed - st, 'accuracy is', res.item())
         acc_curve.append(res.item())
-    plt.plot(acc_curve)
-    plt.show()
+    # plt.plot(acc_curve)
+    # plt.show()
     t2 = datetime.datetime.now()
     save_name = './result/' + args.experiment_name + '.h5'
     res = {
