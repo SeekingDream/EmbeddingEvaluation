@@ -1,6 +1,6 @@
 import os
 import subprocess
-from util import create_tsv_file
+from se_tasks.code_authorship.scripts.util import create_tsv_file
 
 if __name__ == '__main__':
 

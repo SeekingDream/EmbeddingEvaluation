@@ -4,7 +4,7 @@ import pandas as pd
 #import torchwordemb
 import torch
 
-import util as ut
+import se_tasks.code_authorship.scripts.util as ut
 
 
 class VocabBuilder(object):
