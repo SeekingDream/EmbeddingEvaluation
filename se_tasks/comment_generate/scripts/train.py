@@ -215,6 +215,7 @@ def main(args):
 
             reference = samples.label.transpose(1, 0)
             reference = [id2w(pred, TGT) for pred in reference]
+            reference = [[ref] for ref in reference]
             score = bleu_score(preds, reference)
             res_score += score
         res_score = res_score / len(valid_iter)
