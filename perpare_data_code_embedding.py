@@ -3,8 +3,6 @@ import os
 from utils import parse_statement, parse_source
 
 
-
-
 def main():
     err_num = 0
     dir_name = './dataset/raw_code/'
@@ -29,6 +27,7 @@ def main():
                 print('error', project, file_name)
                 pass
     print(err_num)
+
 
 if __name__ == '__main__':
     main()

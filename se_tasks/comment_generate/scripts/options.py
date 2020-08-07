@@ -7,7 +7,7 @@ def train_opts(parser):
         help='path to a train data')
     group.add_argument('--test_data', default='../dataset/test.tsv',
         help='path to a validation data')
-    group.add_argument('--batch', type=int, default=128,
+    group.add_argument('--batch', type=int, default=16,
         help='batch size')
     group.add_argument('--savedir', default='./checkpoints', 
         help='path to save models')
@@ -23,7 +23,7 @@ def train_opts(parser):
         help='gradient cliping')
     group.add_argument('--tf-ratio', type=float, default=0.5,
         help='teaching force ratio')
-    group.add_argument('--gpu', action='store_true',
+    group.add_argument('--gpu', action='store_true', default=True,
         help='whether gpu is used')
     return group
 
@@ -38,7 +38,7 @@ def translate_opts(parser):
         help='batch size')
     group.add_argument('--maxlen', type=int, default=100,
         help='maximum length of output sentence')
-    group.add_argument('--gpu', action='store_true',
+    group.add_argument('--gpu', action='store_true', default=True,
         help='whether gpu is used')
     return group
     
@@ -47,10 +47,10 @@ def model_opts(parser):
     group = parser.add_argument_group('Model\'s hyper-parameters')
     group.add_argument('--embed_dim', type=int, default=200,
         help='dimension of word embeddings')
-    group.add_argument('--src_min-freq', type=int, default=0,
+    group.add_argument('--src_min_freq', type=int, default=3,
         help='''map words of source side appearing less than 
                 threshold times to unknown''')
-    group.add_argument('--tgt_min-freq', type=int, default=0,
+    group.add_argument('--tgt_min_freq', type=int, default=10,
         help='''map words of target side appearing less than
               threshold times to unknown''')
     group.add_argument('--rnn', choices=['lstm'], default='lstm',
@@ -68,7 +68,7 @@ def model_opts(parser):
     group.add_argument('--tied', action='store_true',
         help='tie the word embedding and softmax weight')
     group.add_argument('--embed_type', type=int, choices=[0, 1, 2], default=1)
-    group.add_argument('--embed_file', type=str, default=None)
+    group.add_argument('--embed_path', type=str, default=None)
     group.add_argument('--experiment_name', type=str, default='best_case')
     return group
 

@@ -8,6 +8,33 @@ def _tokenize(text):
     return [ x.lower() for x in text.split() ]
 
 
+class CodeComment:
+    def __init__(self, code, comment):
+        self.body = code
+        self.label = comment
+
+
+class CodeDataset(object):
+    def __init__(self, path_file):
+        # read file
+        df = pd.read_csv(path_file, delimiter='\t')
+        df['body'] = df['body'].apply(_tokenize)
+        df['label'] = df['label'].apply(_tokenize)
+        self.old_samples = df['body'].copy()
+        df['body'] = df['body']
+        df['label'] = df['label']
+        samples = df.values.tolist()
+        self.samples = [CodeComment(s[0], s[1]) for s in samples]
+        self.samples = self.samples[:100]
+        self.body = df['label']
+        self.label = df['body']
+
+    def __getitem__(self, index):
+        return self.samples[index]
+
+    def __len__(self):
+        return len(self.samples)
+
 class TextClassDataLoader(object):
     def __init__(self, path_file, src_word2index, tar_word2index, batch_size=32):
         """
