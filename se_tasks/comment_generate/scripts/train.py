@@ -128,6 +128,8 @@ def main(args):
     pre_embed_path = args.embed_path
     if args.embed_type == 0:
         d_word_index, embed = torch.load(pre_embed_path)
+        if type(embed) is np.ndarray:
+            embed = torch.tensor(embed, dtype=torch.float)
         SRC.vocab.set_vectors(d_word_index, embed, args.embed_dim)
         print('load existing embedding vectors, name is ', pre_embed_path)
     elif args.embed_type == 1:
@@ -171,7 +173,7 @@ def main(args):
 
     epoch = 1
     max_epoch = args.max_epoch or math.inf
-    # max_update = args.max_update or math.inf
+    max_update = args.max_update or math.inf
     best_loss = math.inf
 
     while epoch < max_epoch and trainer.n_updates < max_update \
