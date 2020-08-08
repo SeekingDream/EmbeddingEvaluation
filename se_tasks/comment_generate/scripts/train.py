@@ -128,21 +128,21 @@ def main(args):
     pre_embed_path = args.embed_path
     if args.embed_type == 0:
         d_word_index, embed = torch.load(pre_embed_path)
-        SRC.vocab.set_vectors(d_word_index, embed, args.embedding_dim)
+        SRC.vocab.set_vectors(d_word_index, embed, args.embed_dim)
         print('load existing embedding vectors, name is ', pre_embed_path)
     elif args.embed_type == 1:
         print('create new embedding vectors, training from scratch')
     elif args.embed_type == 2:
-        embed = torch.randn([len(SRC.vocab.stoi), args.embedding_dim]).cuda()
+        embed = torch.randn([len(SRC.vocab.stoi), args.embed_dim]).cuda()
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
     if embed is not None:
         if type(embed) is np.ndarray:
             embed = torch.tensor(embed, dtype=torch.float)
-        assert embed.size()[1] == args.embedding_dim
-    if not os.path.exists('../results'):
-        os.mkdir('../results')
+        assert embed.size()[1] == args.embed_dim
+    if not os.path.exists('se_tasks/comment_generate/result'):
+        os.mkdir('se_tasks/comment_generate/result')
     SRC.vocab.UNK = SRC.unk_token
     TGT.vocab.UNK = TGT.unk_token
     SRC.vocab.stoi.default_factory = int
@@ -171,7 +171,7 @@ def main(args):
 
     epoch = 1
     max_epoch = args.max_epoch or math.inf
-    max_update = args.max_update or math.inf
+    # max_update = args.max_update or math.inf
     best_loss = math.inf
 
     while epoch < max_epoch and trainer.n_updates < max_update \
