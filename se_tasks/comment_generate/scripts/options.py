@@ -67,7 +67,7 @@ def model_opts(parser):
         help='dropout applied to layers (0 means no dropout)')
     group.add_argument('--tied', action='store_true',
         help='tie the word embedding and softmax weight')
-    group.add_argument('--embed_type', type=int, choices=[0, 1, 2], default=1)
+    group.add_argument('--embed_type', type=int, choices=[0, 1, 2], default=2)
     group.add_argument('--embed_path', type=str, default=None)
     group.add_argument('--experiment_name', type=str, default='best_case')
     return group

@@ -133,7 +133,7 @@ def main(args):
     elif args.embed_type == 1:
         print('create new embedding vectors, training from scratch')
     elif args.embed_type == 2:
-        embed = torch.randn([len(SRC.vocab.stoi), args.embedding_dim]).cuda()
+        embed = torch.randn([len(SRC.vocab.stoi), args.embed_dim]).cuda()
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
@@ -221,10 +221,11 @@ def main(args):
         res_score = res_score / len(valid_iter)
         print(res_score)
 
-
         # saving model
-        save_vars = {"train_args": args,
-                     "state_dict": model.state_dict()}
+        save_vars = {
+            "train_args": args,
+            "state_dict": model.state_dict()
+        }
 
 
         save_model(save_vars, "checkpoint_last.pt")
