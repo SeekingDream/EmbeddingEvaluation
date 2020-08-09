@@ -44,8 +44,8 @@ def preprocess_data():
             embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == args.embedding_dim
 
-    if not os.path.exists('../result'):
-        os.mkdir('../result')
+    if not os.path.exists('se_tasks/code_completion/result'):
+        os.mkdir('se_tasks/code_completion/result')
 
     train_loader = Word2vecLoader(train_path, d_word_index, batch_size=args.batch_size)
     val_loader = Word2vecLoader(test_path, d_word_index, batch_size=args.batch_size)
@@ -117,7 +117,7 @@ def main():
         print(epoch, 'cost time', ed -st, 'accuracy is', res.item())
     t2 = datetime.datetime.now()
 
-    weight_save_model = os.path.join('gen', args.weight_name)
+    weight_save_model = os.path.join('se_tasks/code_completion', args.weight_name)
     torch.save(model.encoder.weight, weight_save_model)
     print('result is ', res)
     print('result is ', res, 'cost time', t2 - t1)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', '--learning-rate', default=0.005, type=float, metavar='LR',
                         help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
-    parser.add_argument('--embedding-size', default=100, type=int, metavar='N', help='embedding size')
+    parser.add_argument('--embedding_dim', default=100, type=int, metavar='N', help='embedding size')
     parser.add_argument('--hidden-size', default=128, type=int, metavar='N', help='rnn hidden size')
     parser.add_argument('--layers', default=2, type=int, metavar='N', help='number of rnn layers')
     parser.add_argument('--min_samples', default=5, type=int, metavar='N', help='min number of tokens')
@@ -140,8 +140,8 @@ if __name__ == '__main__':
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
     parser.add_argument('--weight_name', type=str, default='1', help='model name')
     parser.add_argument('--embedding_path', type=str, default='embedding_vec100_1/fasttext.vec')
-    parser.add_argument('--train_data', type=str, default='../dataset/train.tsv',)
-    parser.add_argument('--test_data', type=str, default='../dataset/test.tsv', help='model name')
+    parser.add_argument('--train_data', type=str, default='se_tasks/code_completion/dataset/train.tsv',)
+    parser.add_argument('--test_data', type=str, default='se_tasks/code_completion/dataset/test.tsv', help='model name')
     parser.add_argument('--embedding_type', type=int, default=1, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
