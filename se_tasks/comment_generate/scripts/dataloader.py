@@ -25,7 +25,7 @@ class CodeDataset(object):
         df['label'] = df['label']
         samples = df.values.tolist()
         self.samples = [CodeComment(s[0], s[1]) for s in samples]
-        self.samples = self.samples[:100]
+        self.samples = self.samples[:2000]
         self.body = df['label']
         self.label = df['body']
 

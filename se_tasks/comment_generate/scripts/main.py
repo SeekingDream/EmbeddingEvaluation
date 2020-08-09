@@ -96,8 +96,8 @@ def main(args):
             embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == args.embedding_dim
 
-    if not os.path.exists('../result'):
-        os.mkdir('../result')
+    if not os.path.exists('se_tasks/comment_generate/result'):
+        os.mkdir('se_tasks/comment_generate/result')
 
     train_loader = TextClassDataLoader(train_path, src_word_index, tar_word_index, batch_size=args.batch)
     val_loader = TextClassDataLoader(test_path, src_word_index, tar_word_index, batch_size=args.batch)
