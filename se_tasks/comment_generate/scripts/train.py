@@ -163,11 +163,9 @@ def main(args):
     model = Seq2seqAttn(args, fields)
     model = model.cuda()
     print(model)
-    print('')
 
     criterion = nn.CrossEntropyLoss(ignore_index=TGT.vocab.stoi['____PAD____']).cuda()
     optimizer = optim.SGD(model.parameters(), lr=args.lr)
-    #optimizer = nn.DataParallel(optimizer, device_ids=[1, 2, 3, 7])
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min')
     trainer = Trainer(model, criterion, optimizer, scheduler, args.clip)
 
