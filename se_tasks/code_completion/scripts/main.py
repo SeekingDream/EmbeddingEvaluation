@@ -123,6 +123,7 @@ def main():
     print('result is ', res, 'cost time', t2 - t1)
 
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=10, type=int, metavar='N', help='number of total epochs to run')
