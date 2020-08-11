@@ -51,16 +51,16 @@ def transfer_dataset(dataset, meth_name_list, api_list, tokens_list, d_word_inde
 
 
 def preprocess_data(train_set, valid_set, d_word_index):
-    with open('../dataset/example/vocab.methname.pkl', 'rb') as f:
+    with open('se_tasks/code_search/dataset/example/vocab.methname.pkl', 'rb') as f:
         meth_name_dict = pickle.load(f)
         meth_name_list = dic2list(meth_name_dict)
-    with open('../dataset/example/vocab.desc.pkl', 'rb') as f:
+    with open('se_tasks/code_search/dataset/example/vocab.desc.pkl', 'rb') as f:
         desc_dict = pickle.load(f)
         desc_list = dic2list(desc_dict)
-    with open('../dataset/example/vocab.apiseq.pkl', 'rb') as f:
+    with open('se_tasks/code_search/dataset/example/vocab.apiseq.pkl', 'rb') as f:
         api_dict = pickle.load(f)
         api_list = dic2list(api_dict)
-    with open('../dataset/example/vocab.tokens.pkl', 'rb') as f:
+    with open('se_tasks/code_search/dataset/example/vocab.tokens.pkl', 'rb') as f:
         tokens_dict = pickle.load(f)
         tokens_list = dic2list(tokens_dict)
     train_set = transfer_dataset(train_set, meth_name_list, api_list, tokens_list, d_word_index)
@@ -114,11 +114,11 @@ def bind_nsml(model, **kwargs):
 
 
 def train_model(args):
-    fh = logging.FileHandler(f"./output/{args.model}/{args.dataset}/logs.txt")
+    fh = logging.FileHandler(f"se_tasks/code_search/output/{args.model}/{args.dataset}/logs.txt")
     # create file handler which logs even debug messages
     logger.addHandler(fh)  # add the handlers to the logger
     timestamp = datetime.now().strftime('%Y%m%d%H%M')
-    tb_writer = SummaryWriter(f"./output/{args.model}/{args.dataset}/logs/{timestamp}") if args.visual else None
+    tb_writer = SummaryWriter(f"se_tasks/code_search/output/{args.model}/{args.dataset}/logs/{timestamp}") if args.visual else None
 
 
     device = torch.device(f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu")
@@ -151,6 +151,7 @@ def train_model(args):
     # Define Model
     ###############################################################################
     logger.info('Constructing Model..')
+    # print('show embedding type: {}'.format(args.embed_type))
     model = getattr(models, args.model)(config, args.embed_dim, embed, args.embed_type)  # initialize the model
 
     def save_model(model, ckpt_path):
@@ -161,7 +162,7 @@ def train_model(args):
         model.load_state_dict(torch.load(ckpt_path, map_location=to_device))
 
     if args.reload_from > 0:
-        ckpt = f'./output/{args.model}/{args.dataset}/models/step{args.reload_from}.h5'
+        ckpt = f'se_tasks/code_search/output/{args.model}/{args.dataset}/models/step{args.reload_from}.h5'
         load_model(model, ckpt, device)
 
     if IS_ON_NSML:
@@ -358,7 +359,7 @@ def validate(valid_set, model, pool_size, K, sim_measure):
 
 def parse_args():
     parser = argparse.ArgumentParser("Train and Validate The Code Search (Embedding) Model")
-    parser.add_argument('--data_path', type=str, default='../dataset/', help='location of the data corpus')
+    parser.add_argument('--data_path', type=str, default='se_tasks/code_search/dataset/', help='location of the data corpus')
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('--dataset', type=str, default='example', help='name of dataset.java, python')
     parser.add_argument('--reload_from', type=int, default=-1, help='epoch to reload from')
@@ -392,7 +393,7 @@ def parse_args():
     parser.add_argument('--pause', default=0, type=int)
     parser.add_argument('--iteration', default=0, type=str)
 
-    parser.add_argument('--embed_path', type=str, default='../../../embedding_vec/100_1/fasttext.vec')
+    parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
     parser.add_argument('--embed_type', type=int, default=2, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
@@ -401,12 +402,12 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    set_random_seed(42)
+    # set_random_seed(42)
     args = parse_args()
 
     # make output directory if it doesn't already exist
-    os.makedirs(f'./output/{args.model}/{args.dataset}/models', exist_ok=True)
-    os.makedirs(f'./output/{args.model}/{args.dataset}/tmp_results', exist_ok=True)
+    os.makedirs(f'se_tasks/code_search/output/{args.model}/{args.dataset}/models', exist_ok=True)
+    os.makedirs(f'se_tasks/code_search/output/{args.model}/{args.dataset}/tmp_results', exist_ok=True)
 
     torch.backends.cudnn.benchmark = True  # speed up training by using cudnn
     torch.backends.cudnn.deterministic = True  # fix the random seed in cudnn
