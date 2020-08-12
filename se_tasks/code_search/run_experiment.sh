@@ -46,32 +46,32 @@ EMBEDDING_PATH='embedding_vec100_1/doc2vec.vec'
 EXPERIMENT_NAME='100_1_doc2vec'
 EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
 echo $EXPERIMENT_NAME
-CUDA_VISIBLE_DEVICES=2 python -m se_tasks.code_search.scripts.train \
+CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_search.scripts.train \
 --embed_type=$EMBED_TYPE --learning_rate=$LR \
 --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
 --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
 
 
-# EMBED_TYPE=0
-# EMBEDDING_DIM=100
-# EMBEDDING_PATH='embedding_vec100_1/word2vec.vec'
-# EXPERIMENT_NAME='100_1_word2vec'
-# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
-# echo $EXPERIMENT_NAME
-# CUDA_VISIBLE_DEVICES=2 python -m se_tasks.code_search.scripts.train \
-# --embed_type=$EMBED_TYPE --learning_rate=$LR \
-# --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
-# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+EMBED_TYPE=0
+EMBEDDING_DIM=100
+EMBEDDING_PATH='embedding_vec100_1/word2vec.vec'
+EXPERIMENT_NAME='100_1_word2vec'
+EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+echo $EXPERIMENT_NAME
+CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_search.scripts.train \
+--embed_type=$EMBED_TYPE --learning_rate=$LR \
+--embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
+--experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
 
 
 
-# EMBED_TYPE=0
-# EMBEDDING_DIM=100
-# EMBEDDING_PATH='embedding_vec100_1/fasttext.vec'
-# EXPERIMENT_NAME='100_1_fasttext'
-# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
-# echo $EXPERIMENT_NAME
-# CUDA_VISIBLE_DEVICES=2 python -m se_tasks.code_search.scripts.train \
-# --embed_type=$EMBED_TYPE --learning_rate=$LR \
-# --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
-# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+EMBED_TYPE=0
+EMBEDDING_DIM=100
+EMBEDDING_PATH='embedding_vec100_1/fasttext.vec'
+EXPERIMENT_NAME='100_1_fasttext'
+EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+echo $EXPERIMENT_NAME
+CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_search.scripts.train \
+--embed_type=$EMBED_TYPE --learning_rate=$LR \
+--embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
+--experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG

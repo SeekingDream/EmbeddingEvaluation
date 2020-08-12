@@ -69,7 +69,7 @@ def preprocess_data(train_set, valid_set, d_word_index):
 
 
 def set_embedding(train_set, valid_set):
-    embed = None
+    embed = [None, None, None]
     vocab_size = 10001
     if args.embed_type == 0:
         d_word_index, embed = torch.load(args.embed_path)
@@ -86,7 +86,7 @@ def set_embedding(train_set, valid_set):
         ]
     else:
         raise ValueError('unsupported type')
-    if embed is not None:
+    if embed[0] is not None:
         if type(embed[0]) is np.ndarray:
             embed = [torch.tensor(e, dtype=torch.float).cuda() for e in embed]
         assert embed[0].size(1) == args.embed_dim
@@ -394,7 +394,7 @@ def parse_args():
     parser.add_argument('--iteration', default=0, type=str)
 
     parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
-    parser.add_argument('--embed_type', type=int, default=2, choices=[0, 1, 2])
+    parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
