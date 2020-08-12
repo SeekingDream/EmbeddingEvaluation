@@ -46,7 +46,7 @@ def transfer(val, d_1, d_2):
 def transfer_dataset(dataset, meth_name_list, api_list, tokens_list, d_word_index):
     dataset.apis = transfer(dataset.apis, api_list, d_word_index)
     dataset.names = transfer(dataset.names, meth_name_list, d_word_index)
-    dataset.tokens = transfer(dataset.descs, tokens_list, d_word_index)
+    dataset.tokens = transfer(dataset.tokens, tokens_list, d_word_index)
     return dataset
 
 
@@ -391,8 +391,13 @@ def parse_args():
     parser.add_argument('--pause', default=0, type=int)
     parser.add_argument('--iteration', default=0, type=str)
 
+<<<<<<< HEAD
     parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
     parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
+=======
+    parser.add_argument('--embed_path', type=str, default='../../../embedding_vec100_1/fasttext.vec')
+    parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
+>>>>>>> afc33bcba21d73637ac4902b7d18d95f2a486ea0
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
