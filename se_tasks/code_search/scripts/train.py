@@ -75,6 +75,7 @@ def set_embedding(train_set, valid_set):
         d_word_index, embed = torch.load(args.embed_path)
         embed = [embed, embed, embed]
         train_set, valid_set = preprocess_data(train_set, valid_set, d_word_index)
+        vocab_size = len(d_word_index)
         print('load existing embedding vectors, name is ', args.embed_path)
     elif args.embed_type == 1:
         print('create new embedding vectors, training from scratch')
@@ -91,7 +92,7 @@ def set_embedding(train_set, valid_set):
             embed = [torch.tensor(e, dtype=torch.float).cuda() for e in embed]
         assert embed[0].size(1) == args.embed_dim
 
-    return train_set, valid_set, embed
+    return train_set, valid_set, vocab_size, embed
 
 
 def bind_nsml(model, **kwargs):
@@ -119,8 +120,6 @@ def train_model(args):
     logger.addHandler(fh)  # add the handlers to the logger
     timestamp = datetime.now().strftime('%Y%m%d%H%M')
     tb_writer = SummaryWriter(f"./output/{args.model}/{args.dataset}/logs/{timestamp}") if args.visual else None
-
-
     device = torch.device(f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu")
 
     config = getattr(configs, 'config_' + args.model)()
@@ -142,7 +141,7 @@ def train_model(args):
                                              config['valid_tokens'], config['tokens_len'],
                                              config['valid_desc'], config['desc_len'])
 
-    train_set, valid_set, embed = set_embedding(train_set, valid_set)
+    train_set, valid_set, vocab_size, embed = set_embedding(train_set, valid_set)
 
     data_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=config['batch_size'],
                                               shuffle=True, drop_last=True, num_workers=1)
@@ -151,7 +150,7 @@ def train_model(args):
     # Define Model
     ###############################################################################
     logger.info('Constructing Model..')
-    model = getattr(models, args.model)(config, args.embed_dim, embed, args.embed_type)  # initialize the model
+    model = getattr(models, args.model)(config, vocab_size, args.embed_dim, embed, args.embed_type)  # initialize the model
 
     def save_model(model, ckpt_path):
         torch.save(model.state_dict(), ckpt_path)
@@ -393,7 +392,7 @@ def parse_args():
     parser.add_argument('--iteration', default=0, type=str)
 
     parser.add_argument('--embed_path', type=str, default='../../../embedding_vec/100_1/fasttext.vec')
-    parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
+    parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
