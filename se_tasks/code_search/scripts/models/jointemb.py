@@ -19,15 +19,15 @@ class JointEmbeder(nn.Module):
     https://arxiv.org/pdf/1508.01585.pdf
     https://arxiv.org/pdf/1908.10084.pdf
     """
-    def __init__(self, config, embed_dim, embed_tensor, embed_type):
+    def __init__(self, config, vocab_size, embed_dim, embed_tensor, embed_type):
         super(JointEmbeder, self).__init__()
         self.conf = config
         self.margin = config['margin']
 
-        self.name_encoder=SeqEncoder(config['n_words'], embed_dim, config['lstm_dims'], embed_tensor[0], embed_type)
-        self.api_encoder=SeqEncoder(config['n_words'], embed_dim, config['lstm_dims'], embed_tensor[1], embed_type)
-        self.tok_encoder=BOWEncoder(config['n_words'], embed_dim, config['n_hidden'], embed_tensor[2])
-        self.desc_encoder=SeqEncoder(config['n_words'], embed_dim, config['lstm_dims'], None, 1)
+        self.name_encoder=SeqEncoder(vocab_size, embed_dim, config['lstm_dims'], embed_tensor[0], embed_type)
+        self.api_encoder=SeqEncoder(vocab_size, embed_dim, config['lstm_dims'], embed_tensor[1], embed_type)
+        self.tok_encoder=BOWEncoder(vocab_size, embed_dim, config['n_hidden'], embed_tensor[2])
+        self.desc_encoder=SeqEncoder(vocab_size, embed_dim, config['lstm_dims'], None, 1)
         #self.fuse1=nn.Linear(config['emb_size']+4*config['lstm_dims'], config['n_hidden'])
         #self.fuse2 = nn.Sequential(
         #    nn.Linear(config['emb_size']+4*config['lstm_dims'], config['n_hidden']),
