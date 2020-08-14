@@ -3,13 +3,14 @@ import torch
 import os
 import gensim
 
-EMBED_DIR = './embedding_vec'
-DATA_DIR = './dataset/code_embedding'
+EMBED_DIR = 'embedding_vec'
+DATA_DIR = 'dataset/code_embedding'
 
 EMBEDDING_LIST = [
-    #Word2VecEmbedding,
-    #Doc2VecEmbedding,
-    #FastEmbedding,
+    Word2VecEmbedding,
+    Doc2VecEmbedding,
+    FastEmbedding,
+    GloVeEmbedding,
 ]
 
 
@@ -18,7 +19,9 @@ def train_vec(vec_dim, epoch, data_dir):
     if not os.path.isdir(dir_name):
         os.mkdir(dir_name)
 
-    m = Word2VecEmbedding(data_dir, None, None, vec_dim=vec_dim, epoch=epoch)
+    for embed_model in EMBEDDING_LIST:
+        m = embed_model(data_dir, None, None, vec_dim=vec_dim, epoch=epoch)
+
     vocab, vec = m.generate_embedding()
     torch.save([vocab, vec], dir_name + m.__class__.__name__ + '.vec')
     print(
@@ -32,7 +35,11 @@ def main():
     # if not os.path.isdir(EMBED_DIR):
     #     os.mkdir(EMBED_DIR)
 
-    for dim in [100, 200, 300]:
+    for dim in [
+        100, 
+        # 200, 
+        # 300
+    ]:
         for epoch in [1]:
             train_vec(dim, epoch, DATA_DIR)
 

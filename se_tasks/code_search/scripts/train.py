@@ -391,13 +391,8 @@ def parse_args():
     parser.add_argument('--pause', default=0, type=int)
     parser.add_argument('--iteration', default=0, type=str)
 
-<<<<<<< HEAD
     parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
     parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
-=======
-    parser.add_argument('--embed_path', type=str, default='../../../embedding_vec100_1/fasttext.vec')
-    parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
->>>>>>> afc33bcba21d73637ac4902b7d18d95f2a486ea0
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
@@ -405,7 +400,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    # set_random_seed(42)
+    set_random_seed(42)
     args = parse_args()
 
     # make output directory if it doesn't already exist

@@ -4,10 +4,10 @@ import csv
 from utils import parse_statement
 
 
-with open('../dataset/train.json') as f:
+with open('se_tasks/comment_generate/dataset/train.json') as f:
     dataset = f.readlines()
 train_dataset = [json.loads(data) for data in dataset]
-with open('../dataset/train.tsv',  'w', encoding='utf-8') as f:
+with open('se_tasks/comment_generate/dataset/train.tsv',  'w', encoding='utf-8') as f:
     writer = csv.writer(f, delimiter='\t')
     writer.writerow(['label', 'body'])
     for i, data in enumerate(train_dataset):
@@ -17,10 +17,10 @@ with open('../dataset/train.tsv',  'w', encoding='utf-8') as f:
         except:
             writer.writerow([data['code'], data['nl']])
 
-with open('../dataset/test.json') as f:
+with open('se_tasks/comment_generate/dataset/test.json') as f:
     dataset = f.readlines()
 test_dataset = [json.loads(data) for data in dataset]
-with open('../dataset/test.tsv',  'w', encoding='utf-8') as f:
+with open('se_tasks/comment_generate/dataset/test.tsv',  'w', encoding='utf-8') as f:
     writer = csv.writer(f, delimiter='\t')
     writer.writerow(['label', 'body'])
     for i, data in enumerate(test_dataset):

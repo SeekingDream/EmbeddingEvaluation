@@ -12,11 +12,10 @@ import torch.backends.cudnn as cudnn
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from se_tasks.code_authorship.scripts import VocabBuilder
-from se_tasks.code_authorship.scripts import TextClassDataLoader
-from se_tasks.code_authorship.scripts import RNN
-from se_tasks.code_authorship.scripts import AverageMeter, accuracy
-from se_tasks.code_authorship.scripts import adjust_learning_rate
+from se_tasks.code_authorship.scripts.vocab import VocabBuilder
+from se_tasks.code_authorship.scripts.dataloader import TextClassDataLoader
+from se_tasks.code_authorship.scripts.model import RNN
+from se_tasks.code_authorship.scripts.util import AverageMeter, accuracy, adjust_learning_rate
 
 from utils import set_random_seed
 
