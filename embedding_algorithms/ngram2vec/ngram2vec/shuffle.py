@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--output_file", type=str, required=True,
                         help="Path to the shuffled file.")
     parser.add_argument("--memory_size", type=float, default=4.0,
-                        help="Memory size. Shuffle and write out data when memory is used up.")
+                        help="Memory size. Shuffle and write out dataset when memory is used up.")
     
     args = parser.parse_args()
 

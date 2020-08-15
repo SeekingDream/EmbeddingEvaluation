@@ -5,7 +5,7 @@ import pandas as pd
 from nltk.corpus import wordnet as wn
 from tqdm import tqdm
 
-archived_xml = '../data/EuroSense/eurosense.v1.0.high-precision.xml'
+archived_xml = '../dataset/EuroSense/eurosense.v1.0.high-precision.xml'
 mapping_file = "../resources/bn2wn_mapping.txt"
 
 #BabelNet synset ids to WordNet offset ids

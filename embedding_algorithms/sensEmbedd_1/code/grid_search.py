@@ -113,7 +113,7 @@ class Word2VecModel(BaseEstimator):
 def GridSearch(hyperparameters, corpora):
     '''performs a grid search operation and returns the best hyperparamters based on a correlation score'''
     best_score = - 1
-    gold = pd.read_csv('../data/combined.tab', delimiter = '\t')
+    gold = pd.read_csv('../dataset/combined.tab', delimiter = '\t')
     grid = ParameterGrid(hyperparameters)
     best_grid = None
     print("number of combinations: {}\n".format(len(list(grid))))

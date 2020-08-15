@@ -18,11 +18,11 @@ from grid_search import senseEmbeddings
 
 def gridSearchVisulisation(json_file = "../resources/gridSearch7.json" , save_path = "../report/img/grid.pdf"):
     '''function that visulazes the grid search
-    args: json_file - data of hyperparameters and the correlation score
+    args: json_file - dataset of hyperparameters and the correlation score
           save_path - destination path to save plot
     returns: subplots of swarmplots
     '''
-    #load data
+    #load dataset
     with open(json_file, 'r') as f:
         data = json.load(f)
 
