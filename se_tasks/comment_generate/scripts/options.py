@@ -4,9 +4,9 @@
 def train_opts(parser):
     group = parser.add_argument_group('Training')
     group.add_argument('--train_data', default='se_tasks/comment_generate/dataset/train.tsv',
-                       help='path to a train data')
+                       help='path to a train dataset')
     group.add_argument('--test_data', default='se_tasks/comment_generate/dataset/test.tsv',
-                       help='path to a validation data')
+                       help='path to a validation dataset')
     group.add_argument('--batch', type=int, default=16,
                        help='batch size')
     group.add_argument('--savedir', default='se_tasks/comment_generate/result',

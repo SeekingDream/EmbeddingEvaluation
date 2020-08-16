@@ -70,7 +70,7 @@ def main(args):
     else:
         print("Note that our pre-trained models require CUDA to evaluate.")
     
-    # Load data
+    # Load dataset
     test_set=APIDataset(args.data_path+'test.desc.h5', args.data_path+'test.apiseq.h5', conf['max_sent_len'])
     test_loader=torch.utils.data.DataLoader(dataset=test_set, batch_size=1, shuffle=False, num_workers=1)
     vocab_api = load_dict(args.data_path+'vocab.apiseq.json')
@@ -88,7 +88,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PyTorch DeepAPI for Eval')
-    parser.add_argument('--data_path', type=str, default='./data/', help='location of the data corpus')
+    parser.add_argument('--data_path', type=str, default='./dataset/', help='location of the dataset corpus')
     parser.add_argument('--model', type=str, default='RNNEncDec', help='model name')
     parser.add_argument('--expname', type=str, default='basic', help='experiment name, disinguishing different parameter settings')
     parser.add_argument('--timestamp', type=str, default='201909270147', help='time stamp')

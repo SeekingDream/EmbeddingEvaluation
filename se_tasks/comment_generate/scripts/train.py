@@ -93,7 +93,7 @@ def main(args):
     #device = torch.device('cuda' if args.gpu else 'cpu')
     train_path, test_path = args.train_data, args.test_data
 
-    # load data and construct vocabulary dictionary
+    # load dataset and construct vocabulary dictionary
     SRC = data.Field(
         init_token='<sos>',
         eos_token='<eos>',

@@ -76,7 +76,7 @@ class SGD(object):
         self.step_timer = time.time()
         self.gdata = [theano.shared(numpy.zeros( (2,)*x.ndim,
                     dtype=x.dtype),name=x.name) for x in model.inputs]
-        #training data stored in gpu. They are defined as shared variables from the 
+        #training dataset stored in gpu. They are defined as shared variables from the
         #'inputs' variable in the encoder-decoder model.
         if 'profile' not in self.state:
             self.state['profile'] = 0
@@ -163,7 +163,7 @@ class SGD(object):
         batch = self.data.next()
         assert batch
 
-        # Perturb the data (! and the model)
+        # Perturb the dataset (! and the model)
         if isinstance(batch, dict):
             batch = self.model.perturb(**batch)
         else:

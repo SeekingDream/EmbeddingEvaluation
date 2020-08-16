@@ -87,7 +87,7 @@ class GloveVocabBuilder(object):
 
 if __name__ == "__main__":
 
-    # v_builder = VocabBuilder(path_file='data/train.tsv')
+    # v_builder = VocabBuilder(path_file='dataset/train.tsv')
     # d = v_builder.get_word_index(min_sample=10)
     # print (d['__UNK__'])
     # for k, v in sorted(d.items())[:100]:

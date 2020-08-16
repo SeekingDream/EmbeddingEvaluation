@@ -128,7 +128,7 @@ def train_model(args):
     print(config)
 
     ###############################################################################
-    # Load data
+    # Load dataset
     ###############################################################################
     data_path = DATASET_PATH + "/train/" if IS_ON_NSML else args.data_path + args.dataset + '/'
     train_set = eval(config['dataset_name'])(data_path, config['train_name'], config['name_len'],
@@ -357,7 +357,7 @@ def validate(valid_set, model, pool_size, K, sim_measure):
 
 def parse_args():
     parser = argparse.ArgumentParser("Train and Validate The Code Search (Embedding) Model")
-    parser.add_argument('--data_path', type=str, default='se_tasks/code_search/dataset/', help='location of the data corpus')
+    parser.add_argument('--data_path', type=str, default='se_tasks/code_search/dataset/', help='location of the dataset corpus')
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('--dataset', type=str, default='example', help='name of dataset.java, python')
     parser.add_argument('--reload_from', type=int, default=-1, help='epoch to reload from')

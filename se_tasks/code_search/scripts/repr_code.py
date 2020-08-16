@@ -58,7 +58,7 @@ def repr_code(args):
     
 def parse_args():
     parser = argparse.ArgumentParser("Train and Test Code Search(Embedding) Model")
-    parser.add_argument('--data_path', type=str, default='./data/', help='location of the data corpus')
+    parser.add_argument('--data_path', type=str, default='./dataset/', help='location of the dataset corpus')
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('-d', '--dataset', type=str, default='github', help='dataset')
     parser.add_argument('--reload_from', type=int, default=-1, help='step to reload from')
