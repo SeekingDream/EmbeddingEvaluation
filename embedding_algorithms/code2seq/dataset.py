@@ -6,7 +6,6 @@ import random
 
 
 class C2SDataSet(Dataset):
-
     def get_dataset(self, file_name, max_size):
         with open(file_name, 'rb') as f:
             dataset = pickle.load(f)

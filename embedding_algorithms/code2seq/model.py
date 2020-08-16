@@ -153,7 +153,6 @@ class Code2Seq(nn.Module):
                         tar_word != self.target_dict["____UNKNOW____"]:
                     if tar_word not in pre:
                         false_negative += 1
-
         return true_positive, false_positive, false_negative
 
     def train_decode(self, encode_context, context_mask, targets):
