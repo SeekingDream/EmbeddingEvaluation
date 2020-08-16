@@ -81,10 +81,22 @@ TEST_DATA=$FOLDER'/dataset/test.tsv'    # file for testing dataset
 # --experiment_name=$EXPERIMENT_NAME | tee $EXPERIMENT_LOG
 
 
+# EMBEDDING_TYPE=0
+# EMBEDDING_DIM=100
+# EMBEDDING_PATH='embedding_vec100_1/glove.vec'
+# EXPERIMENT_NAME='100_1_glove'
+# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+# echo $EXPERIMENT_NAME
+# CUDA_VISIBLE_DEVICES=0 python -m se_tasks.code_authorship.scripts.main --epochs=$EPOCHS --batch=$BATCH --lr=$LR \
+# --embedding_dim=$EMBEDDING_DIM --classes=$CLASSES --embedding_path=$EMBEDDING_PATH \
+# --train_data=$TRAIN_DATA --test_data=$TEST_DATA --embedding_type=$EMBEDDING_TYPE \
+# --experiment_name=$EXPERIMENT_NAME | tee $EXPERIMENT_LOG
+
+
 EMBEDDING_TYPE=0
 EMBEDDING_DIM=100
-EMBEDDING_PATH='embedding_vec100_1/glove.vec'
-EXPERIMENT_NAME='100_1_glove'
+EMBEDDING_PATH='embedding_vec100_1/ori_code2seq.vec'
+EXPERIMENT_NAME='code2seq'
 EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
 echo $EXPERIMENT_NAME
 CUDA_VISIBLE_DEVICES=0 python -m se_tasks.code_authorship.scripts.main --epochs=$EPOCHS --batch=$BATCH --lr=$LR \

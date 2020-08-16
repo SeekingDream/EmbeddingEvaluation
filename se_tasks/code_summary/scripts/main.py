@@ -32,7 +32,8 @@ def my_collate(batch):
 
 def train_model(
     tk_path, train_path, test_path, embed_dim, embed_type, 
-    vec_path, experiment_name, train_batch
+    vec_path, experiment_name, train_batch, epochs, lr, 
+    weight_decay, max_size=50000, out_dir=None
 ):
     with open(tk_path, 'rb') as f:
         token2index, path2index, func2index = pickle.load(f)
@@ -62,8 +63,8 @@ def train_model(
     criterian = nn.CrossEntropyLoss()  # loss
     optimizer = torch.optim.Adam(
         filter(lambda p: p.requires_grad, model.parameters()), 
-        lr=args.lr,
-        weight_decay=args.weight_decay
+        lr=lr,
+        weight_decay=weight_decay
     )
 
     train_dataset = CodeLoader(train_path)
@@ -76,7 +77,7 @@ def train_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    for epoch in range(args.epochs):
+    for epoch in range(epochs):
         acc = 0
         st_time = datetime.datetime.now()
         for i, ((sts, paths, eds), y, length) in enumerate(train_loader):
@@ -96,6 +97,7 @@ def train_model(
             'acc:', acc.float().item() / len(train_dataset), 
             'cost time', ed_time - st_time
         )
+    return model, token2index
 
 
 def main(args_set):
@@ -107,9 +109,12 @@ def main(args_set):
     vec_path = args_set.embed_path
     experiment_name = args.experiment_name
     train_batch = args.batch
+    epochs = args.epochs
+    lr = args.lr
+    weight_decay=args.weight_decay
     train_model(
         tk_path, train_path, test_path, embed_dim, embed_type, 
-        vec_path, experiment_name, train_batch
+        vec_path, experiment_name, train_batch, epochs, lr, weight_decay
     )
 
 

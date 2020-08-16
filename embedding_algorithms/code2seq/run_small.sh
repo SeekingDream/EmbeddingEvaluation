@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python main.py \
+python -m embedding_algorithms.code2seq.main \
 --trainpath train.h5 \
 -g 0 \
 --validpath valid.h5 \
