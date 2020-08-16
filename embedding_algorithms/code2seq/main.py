@@ -1,45 +1,42 @@
 import argparse
-from model import Code2Seq
 import pickle
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from dataset import C2SDataSet
 import torch
 import tqdm
-import h5py
+
+from torch.utils.data import DataLoader
+
+from embedding_algorithms.code2seq.dataset import C2SDataSet
+from embedding_algorithms.code2seq.model import Code2Seq
+#from se_tasks.code_summary.scripts.main import my_collate
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--epoch", "-e", type=int, default=1,
                         help="Number of examples in epoch")
-    parser.add_argument("--batchsize", "-b", type=int, default=1,
+    parser.add_argument("--batchsize", "-b", type=int, default=128,
                         help="Number of examples in each mini-batch")
-    parser.add_argument("--gpu", "-g", type=int, default=-1,
+    parser.add_argument("--gpu", "-g", type=int, default=3,
                         help="GPU ID (negative value indicates CPU)")
     parser.add_argument("--out", "-o", default="result",
                         help="Directory to output the result")
     parser.add_argument("--resume", "-r", default="",
                         help="Resume the training from snapshot")
-    parser.add_argument("--path_rnn_size", type=int, default=128*2,
-                        help="embedding size of path")
-    parser.add_argument("--embed_size", type=int, default=128,
-                        help="embedding size")
+
     parser.add_argument("--datapath",
-                        default="./java-small/java-small.dict.c2v",
+                        default='../../dataset/java-small-code2seq/tk.pkl',
                         help="path of input data")
     parser.add_argument("--trainpath",
-                        default="./data/java14m/java14m.train.c2v",
+                        default='../../dataset/java-small-code2seq/train.pkl',
                         help="path of train data")
     parser.add_argument("--validpath",
-                        default="./data/java14m/java14m.val.c2v",
+                        default='../../dataset/java-small-code2seq/test.pkl',
                         help="path of valid data")
     parser.add_argument("--savename", default="",
                         help="name of saved model")
-    parser.add_argument("--trainnum", type=int, default=15344512,
+    parser.add_argument("--max_size", type=int, default=None,
                         help="size of train data")
-    parser.add_argument("--validnum", type=int, default=320866,
-                        help="size of valid data")
     parser.add_argument("--context_length", type=int, default=200,
                         help="length of context")
     parser.add_argument("--terminal_length", type=int, default=5,
@@ -58,6 +55,7 @@ def main():
                         help="the number of worker")
     parser.add_argument("--decode_size", type=int, default=320,
                         help="decode size")
+    parser.add_argument("--embed_dim", type=int, default=100)
 
     args = parser.parse_args()
 
@@ -66,27 +64,8 @@ def main():
     print(device)
 
     with open(args.datapath, "rb") as file:
-        terminal_counter = pickle.load(file)
-        path_counter = pickle.load(file)
-        target_counter = pickle.load(file)
-        # _ = pickle.load(file)
-        # _ = pickle.load(file)
+        terminal_dict, path_dict, target_dict = pickle.load(file)
         print("Dictionaries loaded.")
-    train_h5 = h5py.File(args.trainpath, "r")
-    test_h5 = h5py.File(args.validpath, "r")
-
-    terminal_dict = {w: i for i, w in enumerate(
-        sorted([w for w, c in terminal_counter.items()]))}
-    terminal_dict["<unk>"] = len(terminal_dict)
-    terminal_dict["<pad>"] = len(terminal_dict)
-    path_dict = {w: i for i, w in enumerate(sorted(path_counter.keys()))}
-    path_dict["<unk>"] = len(path_dict)
-    path_dict["<pad>"] = len(path_dict)
-    target_dict = {w: i for i, w in enumerate(
-        sorted([w for w, c in target_counter.items()]))}
-    target_dict["<unk>"] = len(target_dict)
-    target_dict["<bos>"] = len(target_dict)
-    target_dict["<pad>"] = len(target_dict)
 
     print("terminal_vocab:", len(terminal_dict))
     print("target_vocab:", len(target_dict))
@@ -94,48 +73,37 @@ def main():
     c2s = Code2Seq(args, terminal_vocab_size=len(terminal_dict),
                    path_element_vocab_size=len(path_dict),
                    target_dict=target_dict, device=device,
-                   path_embed_size=args.embed_size,
-                   terminal_embed_size=args.embed_size,
-                   path_rnn_size=args.path_rnn_size,
-                   target_embed_size=args.embed_size,
+                   path_embed_size=args.embed_dim,
+                   terminal_embed_size=args.embed_dim,
+                   path_rnn_size=args.embed_dim * 2,
+                   target_embed_size=args.embed_dim,
                    decode_size=args.decode_size)\
         .to(device)
 
     if args.resume != "":
         c2s.load_state_dict(torch.load(args.resume))
 
-    trainloader = DataLoader(
-        C2SDataSet(args, train_h5, args.trainnum,
-                   terminal_dict, path_dict, target_dict, device),
-        batch_size=args.batchsize,
-        shuffle=True, num_workers=args.num_worker)
-
-    validloader = DataLoader(
-        C2SDataSet(args, test_h5, args.validnum,
-                   terminal_dict, path_dict, target_dict, device),
-        batch_size=args.batchsize,
-        shuffle=True, num_workers=args.num_worker)
-
-    optimizer = optim.SGD(c2s.parameters(), lr=0.01,
-                          momentum=0.95)
+    train_path, test_path = args.trainpath, args.validpath
+    val_dataset = \
+        C2SDataSet(args, train_path, terminal_dict, path_dict,
+                   target_dict, max_size=args.max_size, device=device)
+    train_dataset = \
+        C2SDataSet(args, test_path, terminal_dict, path_dict,
+                   target_dict, max_size=args.max_size, device=device)
+    batch_size = args.batchsize
+    train_loader = DataLoader(train_dataset, batch_size=batch_size)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size)
+    optimizer = optim.SGD(c2s.parameters(), lr=0.01, momentum=0.95)
     scheduler = optim.lr_scheduler.StepLR(
         optimizer, step_size=1, gamma=0.95, last_epoch=-1)
 
-    trainloader = DataLoader(
-        C2SDataSet(args, train_h5, args.trainnum,
-                   terminal_dict, path_dict, target_dict, device),
-        batch_size=args.batchsize,
-        shuffle=True, num_workers=args.num_worker)
-
     for epoch in range(args.epoch):
         if not args.eval:
-
-
             sum_loss = 0
             train_count = 0
             c2s.train()
             scheduler.step()  # epochごとなのでここ
-            for data in tqdm.tqdm(trainloader):
+            for data in tqdm.tqdm(train_loader):
                 loss = c2s(*data, is_eval=False)
                 optimizer.zero_grad()
                 loss.backward()
@@ -146,7 +114,7 @@ def main():
                     sum_loss = 0
                 train_count += 1
         true_positive, false_positive, false_negative = 0, 0, 0
-        for data in tqdm.tqdm(validloader):
+        for data in tqdm.tqdm(val_loader):
             c2s.eval()
             with torch.no_grad():
                 true_positive_, false_positive_, false_negative_ = c2s(
@@ -163,8 +131,9 @@ def main():
             break
         if args.savename != "":
             torch.save(c2s.state_dict(), args.savename + str(epoch) + ".model")
-    if args.savename != "":
-        torch.save(c2s.state_dict(), args.savename + ".model")
+
+    w = c2s.terminal_element_embedding.weight.detach().cpu().numpy()
+    torch.save([terminal_dict, w], '../../embedding_vec/'+str(args.embed_dim)+'_1/ori_code2seq.vec')
 
 
 def calculate_results(true_positive, false_positive, false_negative):

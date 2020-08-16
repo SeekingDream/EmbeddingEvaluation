@@ -142,15 +142,15 @@ class Code2Seq(nn.Module):
         predict = torch.argmax(output, 2)
         for pre, tar in zip(predict, targets):
             for pre_word in pre:
-                if pre_word != self.target_dict["<pad>"] and \
-                        pre_word != self.target_dict["<unk>"]:
+                if pre_word != self.target_dict["____PAD____"] and \
+                        pre_word != self.target_dict["____UNKNOW____"]:
                     if pre_word in tar:
                         true_positive += 1
                     else:
                         false_positive += 1
             for tar_word in tar:
-                if tar_word != self.target_dict["<pad>"] and \
-                        tar_word != self.target_dict["<unk>"]:
+                if tar_word != self.target_dict["____PAD____"] and \
+                        tar_word != self.target_dict["____UNKNOW____"]:
                     if tar_word not in pre:
                         false_negative += 1
 
