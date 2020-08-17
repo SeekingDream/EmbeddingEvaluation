@@ -1,12 +1,9 @@
-import logging
 import fasttext
-import pandas as pd
-import codecs
-from embedding_algorithms import BasicEmbedding
 import numpy as np
 from gensim.models import word2vec
 import os
 from utils import BASEDICT
+from embedding_algorithms import BasicEmbedding
 
 
 class FastEmbedding(BasicEmbedding):

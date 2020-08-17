@@ -1,6 +1,5 @@
 from gensim.models import word2vec
 from embedding_algorithms import BasicEmbedding
-import numpy as np
 from utils import trans_vocab
 
 

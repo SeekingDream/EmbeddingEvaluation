@@ -1,7 +1,5 @@
 from gensim.models import doc2vec, word2vec
-from gensim.models.doc2vec import TaggedDocument
 from embedding_algorithms import BasicEmbedding
-import numpy as np
 import gensim
 from utils import trans_vocab
 

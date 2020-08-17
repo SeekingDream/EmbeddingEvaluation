@@ -1,4 +1,3 @@
-import numpy as np
 from gensim.models import word2vec
 from embedding_algorithms import BasicEmbedding
 from glove import Corpus, Glove 
