@@ -1,31 +1,20 @@
 from gensim.models import word2vec
 from embedding_algorithms import BasicEmbedding
 import numpy as np
-
-
-def trans_vocab(vocab, vectors):
-    new_vocab = {
-        '____UNKNOW____': 0,
-        '____PAD____': 1
-    }
-    for tk in vocab:
-        new_vocab[tk] = vocab[tk].index + 2
-    dim = vectors.shape[1]
-    tmp_vec = np.random.rand(2, dim)
-    vec = np.concatenate([tmp_vec, vectors])
-    return new_vocab, vec
+from utils import trans_vocab
 
 
 class Word2VecEmbedding(BasicEmbedding):
     def __init__(self, file_name, dataset, vocab, vec_dim, epoch):
         super(Word2VecEmbedding, self).__init__(file_name, dataset, vocab, vec_dim, epoch)
 
-    def generate_embedding(self):
+    def generate_embedding(self, model_type):
         sentences = word2vec.PathLineSentences(self.file_name)
         model = word2vec.Word2Vec(
             sentences=sentences,
             size=self.vec_dim,
-            min_count=10,
+            sg=model_type,
+            min_count=1,
             workers=10
         )
         model.train(
