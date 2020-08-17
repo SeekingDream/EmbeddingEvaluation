@@ -12,6 +12,7 @@ class GloVeEmbedding(BasicEmbedding):
         super(GloVeEmbedding, self).__init__(
             file_name, dataset, vocab, vec_dim, learning_rate
         )
+        self.learning_rate = learning_rate
         self.no_threads = no_threads
         self.window = window
         self.epoch = epoch
