@@ -21,9 +21,9 @@ class CodeSearchDataset(data.Dataset):
         self.max_tok_len=max_tok_len
         self.max_desc_len=max_desc_len
         # 1. Initialize file path or list of file names.
-        """read training data(list of int arrays) from a hdf5 file"""
+        """read training dataset(list of int arrays) from a hdf5 file"""
         self.training=False
-        print("loading data...")
+        print("loading dataset...")
         table_name = tables.open_file(data_dir+f_name)
         self.names = table_name.get_node('/phrases')[:].astype(np.long)
         self.idx_names = table_name.get_node('/indices')[:]
@@ -112,7 +112,7 @@ def save_vecs(vecs, fout):
     fvec.close()
 
 if __name__ == '__main__':
-    input_dir='../data/github/'
+    input_dir='../dataset/github/'
     train_set=CodeSearchDataset(input_dir, 'train.methname.h5', 6, 'train.apiseq.h5', 20, 'train.tokens.h5', 30, 'train.desc.h5', 30)
     train_data_loader=torch.utils.data.DataLoader(dataset=train_set, batch_size=1, shuffle=False, num_workers=1)
     use_set=CodeSearchDataset(input_dir, 'use.methname.h5', 6, 'use.apiseq.h5', 20, 'use.tokens.h5', 30)

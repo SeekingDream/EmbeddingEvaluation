@@ -123,7 +123,7 @@ class CharEmbedding(nn.Module):
         self.init_weights()
         
     def init_weights(self):
-        #self.embed.weight.data.uniform_(-0.05,0.05)
+        #self.embed.weight.dataset.uniform_(-0.05,0.05)
         for conv in self.convolutions:
             conv[0].weight.data.uniform_(-0.05,0.05)
             conv[0].bias.data.fill_(0)       
@@ -180,9 +180,9 @@ class RNNEncoder(nn.Module):
         for name, param in self.rnn.named_parameters(): # initialize the gate weights 
             # adopted from https://gist.github.com/jeasinema/ed9236ce743c8efaf30fa2ff732749f5
             #if len(param.shape)>1:
-            #    weight_init.orthogonal_(param.data) 
+            #    weight_init.orthogonal_(param.dataset)
             #else:
-            #    weight_init.normal_(param.data)                
+            #    weight_init.normal_(param.dataset)
             # adopted from fairseq
             if 'weight' in name or 'bias' in name: 
                 param.data.uniform_(-0.1, 0.1)

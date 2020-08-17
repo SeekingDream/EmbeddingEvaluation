@@ -198,12 +198,12 @@ def sample(lm_model, seq, n_samples, sampler=None, beam_search=None,
 
 
 def parse_args():
-    '''--state ./data/search_desc2apiseq_state.pkl 
-    --model_path ./data/search_desc2apiseq_model.npz 
-    --source ./data/test.desc.txt 
-    --trans ./data//result.apiseq.txt 
-    --validate ./data/test.apiseq.txt'''
-    defaultfolder='./data/'
+    '''--state ./dataset/search_desc2apiseq_state.pkl
+    --model_path ./dataset/search_desc2apiseq_model.npz
+    --source ./dataset/test.desc.txt
+    --trans ./dataset//result.apiseq.txt
+    --validate ./dataset/test.apiseq.txt'''
+    defaultfolder='./dataset/'
     defaultstate=defaultfolder+'search_desc2apiseq_state.pkl'
     defaultmodel=defaultfolder+'search_desc2apiseq_model.npz'
     defaultsource=defaultfolder+'test.desc.txt'
@@ -230,8 +230,8 @@ def parse_args():
 def main():
     args = parse_args()
     # Sample args: 
-    # --state .\data\phrase_state.pkl  
-    # --beam-search --model_path .\data\github\phrase_model.npz
+    # --state .\dataset\phrase_state.pkl
+    # --beam-search --model_path .\dataset\github\phrase_model.npz
 
     state = prototype_state()
     with open(args.state, 'rb') as src:

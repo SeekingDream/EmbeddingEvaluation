@@ -23,18 +23,20 @@ class OutlierDetection:
             res.append(abs(z_score) > 2)
         return res
 
-
-
-
     # def dbscan_criterion(self):
     #     dbscan = DBSCAN(
     #         eps=500, min_samples=4, metric=geodistance).fit(list(group['lon_lat']))
     #     # 对于DBSCAN来说，两个最重要的参数就是eps，和min_samples。当然这两个值不是随便定义的，这个在下文再说
 
     def isolation_criterion(self):
-        clf = IsolationForest(behaviour="new", max_samples=100, random_state=1, contamination="auto")
-        preds = clf.fit_predict(self.p_table)
-        return preds
+        res = []
+        for i, val in enumerate(self.p_table):
+            print(i)
+            clf = IsolationForest(max_samples=6, random_state=1, contamination="auto")
+            clf.fit(np.array(val).reshape([-1, 1]))
+            preds = clf.predict(np.array(val).reshape([-1, 1]))
+            res.append(preds == 1)
+        return res
 
 
 class SemanticCosine:
@@ -64,8 +66,9 @@ class SemanticCosine:
                 p_list.append(p1)
             p_table.append(p_list)
         detector = OutlierDetection(p_table)
-        res = detector.pauta_criterion()
-        print(np.sum(res, 0, dtype=np.float) / self.sampling_num)
+        #res = detector.pauta_criterion()
+        res = detector.isolation_criterion()
+        print(1 - np.sum(res, 0, dtype=np.float) / self.sampling_num)
 
     def is_contain(self, tk):
         for dict_map in self.word2index:

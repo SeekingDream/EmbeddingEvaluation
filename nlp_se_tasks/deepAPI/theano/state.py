@@ -8,7 +8,7 @@ def prototype_state():
 
     # ----- DATA -----
     # (all Nones in this section are placeholders for required values)
-    # Data folder of all data sets
+    # Data folder of all dataset sets
     state['datafolder']=""
     # Source sequences (must be singleton list for backward compatibility)
     state['source'] = [None]
@@ -170,7 +170,7 @@ def prototype_state():
     # Turns on trimming the trailing paddings from batches
     # consisting of short sentences.
     state['trim_batches'] = True
-    # Loop through the data
+    # Loop through the dataset
     state['use_infinite_loop'] = True
     # Start from a random entry
     state['shuffle'] = False
@@ -191,7 +191,7 @@ def prototype_state():
     # Error level to stop at
     state['minerr'] = -1
 
-    # Reset data iteration every this many epochs
+    # Reset dataset iteration every this many epochs
     state['reset'] = -1
     # Frequency of training error reports (in number of batches)
     state['trainFreq'] = 1
@@ -218,7 +218,7 @@ def prototype_phrase_state():
 
     state = prototype_state()
 
-    state['datafolder']="./data/"
+    state['datafolder']="./dataset/"
     state['source'] = [state['datafolder']+"train.desc.h5"]
     state['target'] = [state['datafolder']+"train.apiseq.h5"]
     state['word_indx'] = state['datafolder']+"vocab.desc.json"
@@ -244,7 +244,7 @@ def prototype_search_state():
     'Neural Machine Translation by Jointly Learning to Align and Translate' """
     state = prototype_state()
     
-    state['datafolder']="./data/"
+    state['datafolder']="./dataset/"
     state['source'] = [state['datafolder']+"train.desc.h5"]
     state['target'] = [state['datafolder']+"train.apiseq.h5"]
    

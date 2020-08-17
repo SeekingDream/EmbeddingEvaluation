@@ -1,9 +1,9 @@
 import os
 import torch
-from vector_evaluation import SemanticCosine
+from vector_evaluation.SemanticMetric import SemanticCosine
 import joblib
 
-vec_dir = '../embedding_vec/100_1/'
+vec_dir = '/glusterfs/data/wei/EmbeddingData/embedding_vec/100_1/'
 dict_list, vec_list = {}, {}
 
 
@@ -30,7 +30,9 @@ for k in vec_list:
     print(k)
 
 
-metric = SemanticCosine(vec, index2word=index2word, word2index=word2index, sampling_num=1000)
+metric = SemanticCosine(
+    vec, index2word=index2word, word2index=word2index, sampling_num=1000
+)
 metric.calculate_score()
 # metric = SemanticCosine(vec, sampling_num=5000)
 # metric.calculate_score()

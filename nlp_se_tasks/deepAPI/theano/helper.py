@@ -6,7 +6,7 @@ import operator
 import itertools
 from groundhog.datasets import PytablesBitextIterator
 def create_padded_batch(state, x, y, return_dict=False):
-    """A callback given to the iterator to transform data in suitable format
+    """A callback given to the iterator to transform dataset in suitable format
 
     :type x: list
     :param x: list of numpy.array's, each array is a batch of phrases in some of source languages

@@ -30,4 +30,4 @@ with open('se_tasks/comment_generate/dataset/test.tsv',  'w', encoding='utf-8') 
         except:
             writer.writerow([data['code'], data['nl']])
 
-print('perpeare the data successful')
+print('perpeare the dataset successful')

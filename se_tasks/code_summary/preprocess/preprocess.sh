@@ -4,7 +4,7 @@
 # TRAIN_DIR, VAL_DIR and TEST_DIR should be paths to
 #   directories containing sub-directories with .java files
 #   each of {TRAIN_DIR, VAL_DIR and TEST_DIR} should have sub-dirs,
-#   and data will be extracted from .java files found in those sub-dirs).
+#   and dataset will be extracted from .java files found in those sub-dirs).
 # DATASET_NAME is just a name for the currently extracted
 #   dataset.
 # MAX_CONTEXTS is the number of contexts to keep for each
@@ -62,7 +62,7 @@ ${PYTHON} preprocess.py --train_data ${TRAIN_DATA_FILE} --test_data ${TEST_DATA_
   --target_vocab_size ${TARGET_VOCAB_SIZE} --word_histogram ${ORIGIN_HISTOGRAM_FILE} \
   --path_histogram ${PATH_HISTOGRAM_FILE} --target_histogram ${TARGET_HISTOGRAM_FILE} --output_name data/${DATASET_NAME}/${DATASET_NAME}
 
-# If all went well, the raw data files can be deleted, because preprocess.py creates new files
+# If all went well, the raw dataset files can be deleted, because preprocess.py creates new files
 # with truncated and padded number of paths for each example.
 rm ${TRAIN_DATA_FILE} ${VAL_DATA_FILE} ${TEST_DATA_FILE} ${TARGET_HISTOGRAM_FILE} ${ORIGIN_HISTOGRAM_FILE} \
   ${PATH_HISTOGRAM_FILE}

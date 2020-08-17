@@ -41,13 +41,13 @@ class MainLoop(object):
                  hooks=None, reset=-1, train_cost=False, validate_postprocess=None, l2_params=False):
         """
         :type train_data: groundhog dataset object
-        :param train_data: data iterator used for training
+        :param train_data: dataset iterator used for training
 
         :type valid_data: groundhog dataset object
-        :param valid_data: data iterator used for validation
+        :param valid_data: dataset iterator used for validation
 
         :type test_data: groundhog dataset object
-        :param test_data: data iterator used for testing
+        :param test_data: dataset iterator used for testing
 
         :type model: groundhog model object
         :param model: the model that is supposed to be trained
@@ -326,7 +326,7 @@ class MainLoop(object):
                     [fn() for fn in self.hooks]
                 if self.reset > 0 and self.step > 1 and \
                    self.step % self.reset == 0:
-                    print ('Resetting the data iterator')
+                    print ('Resetting the dataset iterator')
                     self.train_data.reset()
 
                 self.step += 1

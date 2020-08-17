@@ -2,23 +2,23 @@
 def config_JointEmbeder():   
     conf = {
         # data_params
-        'dataset_name':'CodeSearchDataset', # name of dataset to specify a data loader
-            #training data
+        'dataset_name':'CodeSearchDataset', # name of dataset to specify a dataset loader
+            #training dataset
             'train_name':'train.methname.h5',
             'train_api':'train.apiseq.h5',
             'train_tokens':'train.tokens.h5',
             'train_desc':'train.desc.h5',
-            #test data
+            #test dataset
             'valid_name':'test.methname.h5',
             'valid_api':'test.apiseq.h5',
             'valid_tokens':'test.tokens.h5',
             'valid_desc':'test.desc.h5',
-            #use data (computing code vectors)
+            #use dataset (computing code vectors)
             'use_codebase':'use.rawcode.txt',#'use.rawcode.h5'
             'use_names':'use.name.h5',
             'use_apis':'use.apiseq.h5',
             'use_tokens':'use.tokens.h5',
-            #results data(code vectors)            
+            #results dataset(code vectors)
             'use_codevecs':'use.codevecs.h5',        
                    
             #parameters

@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from tqdm import tqdm
 
-# from torchtext import data
+# from torchtext import dataset
 # from torchtext import vocab
 # from torchtext import datasets
 # from torchtext.vocab import Vectors

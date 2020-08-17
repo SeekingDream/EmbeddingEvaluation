@@ -1,3 +1,3 @@
 '''
-    data from https://github.com/xing-hu/DeepCom
+    dataset from https://github.com/xing-hu/DeepCom
 '''
