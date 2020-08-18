@@ -15,7 +15,7 @@ class BasicEmbedding(nn.Module):
         self.file_name = file_name
 
     @abstractmethod
-    def generate_embedding(self):
+    def generate_embedding(self, model_type):
         return None, None
 
     def save_embedding(self, file_name):

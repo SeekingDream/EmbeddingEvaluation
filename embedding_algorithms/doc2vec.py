@@ -1,21 +1,7 @@
 from gensim.models import doc2vec, word2vec
-from gensim.models.doc2vec import TaggedDocument
 from embedding_algorithms import BasicEmbedding
-import numpy as np
 import gensim
-import os
-
-def trans_vocab(vocab, vectors):
-    new_vocab = {
-        '____UNKNOW____': 0,
-        '____PAD____': 1
-    }
-    for tk in vocab:
-        new_vocab[tk] = vocab[tk].index + 2
-    dim = vectors.shape[1]
-    tmp_vec = np.random.rand(2, dim)
-    vec = np.concatenate([tmp_vec, vectors])
-    return new_vocab, vec
+from utils import trans_vocab
 
 
 class LabeledLineSentence(object):
@@ -35,7 +21,7 @@ class Doc2VecEmbedding(BasicEmbedding):
     def __init__(self, file_name, dataset, vocab, vec_dim, epoch):
         super(Doc2VecEmbedding, self).__init__(file_name, dataset, vocab, vec_dim, epoch)
 
-    def generate_embedding(self):
+    def generate_embedding(self, model_type):
         sentences = word2vec.PathLineSentences(self.file_name)
         docLabels = sentences.input_files
         data = []
@@ -47,8 +33,9 @@ class Doc2VecEmbedding(BasicEmbedding):
         model = doc2vec.Doc2Vec(
             documents=it,
             vector_size=self.vec_dim,
-            min_count=10,
-            workers=10
+            dm=model_type,
+            min_count=1,
+            workers=10,
         )
         model.train(
             documents=it,
