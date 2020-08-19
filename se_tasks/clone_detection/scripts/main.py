@@ -7,7 +7,7 @@ import pickle
 import torch
 from torch import nn
 import torch.backends.cudnn as cudnn
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from tqdm import tqdm
 from utils import set_random_seed
 from torch.utils.data import DataLoader
@@ -48,8 +48,8 @@ def perpare_exp_set(embed_type, ebed_path, train_path, embed_dim):
             embed = torch.tensor(embed, dtype=torch.float)
         assert embed.size(1) == embed_dim
 
-    if not os.path.exists('../result'):
-        os.mkdir('../result')
+    if not os.path.exists('se_tasks/clone_detection/result'):
+        os.mkdir('se_tasks/clone_detection/result')
     return d_word_index, embed
 
 
@@ -112,7 +112,8 @@ def main(arg_set):
         weight_decay=arg_set.weight_decay
     )
     criterion = nn.MSELoss()
-    device = torch.device(int(arg_set.device))
+    # device = torch.device(int(arg_set.device))
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
     acc_curve = []
@@ -124,7 +125,7 @@ def main(arg_set):
         print(epoch, ' epoch cost time', ed - st, 'result is', res)
         acc_curve.append(res)
 
-    save_name = 'se_tasks/code_authorship/result/' + arg_set.experiment_name + '.h5'
+    save_name = 'se_tasks/clone_detection/result/' + arg_set.experiment_name + '.h5'
     res = {
         'word2index': d_word_index,
         'model': model.state_dict(),
@@ -141,9 +142,9 @@ if __name__ == '__main__':
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
-    parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/Word2VecEmbedding0.vec')
-    parser.add_argument('--train_data', type=str, default='../data/train.pkl')
-    parser.add_argument('--test_data', type=str, default='../data/test.pkl')
+    parser.add_argument('--embed_path', type=str, default='embedding_vec/100_2/Word2VecEmbedding0.vec')
+    parser.add_argument('--train_data', type=str, default='se_tasks/clone_detection/data/train.pkl')
+    parser.add_argument('--test_data', type=str, default='se_tasks/clone_detection/data/test.pkl')
     parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--device', type=int, default=7)
