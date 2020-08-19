@@ -113,7 +113,7 @@ def main(arg_set):
         res = test_model(val_loader, model, device)
         ed = datetime.datetime.now()
         print(epoch, ' epoch cost time', ed - st, 'accuracy is', res)
-        acc_curve.append(res.item())
+        acc_curve.append(res)
 
     plt.plot(acc_curve)
     plt.show()
@@ -130,7 +130,7 @@ def main(arg_set):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
-    parser.add_argument('--batch', default=16, type=int, metavar='N', help='mini-batch size')
+    parser.add_argument('--batch', default=256, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
