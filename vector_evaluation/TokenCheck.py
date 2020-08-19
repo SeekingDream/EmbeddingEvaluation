@@ -16,7 +16,8 @@ def find_common_token(src_index, dict_list):
     print('count', count)
 
 
-vec_dir = '/glusterfs/data/wei/EmbeddingData/embedding_vec/100_1/'
+# vec_dir = '/glusterfs/data/wei/EmbeddingData/embedding_vec/100_2/'
+vec_dir = '/home/yxl190090/data/EmbeddingEvaluation/embedding_vec/100_2/'
 dict_list, file_list = [], []
 for file_name in os.listdir(vec_dir):
     dict_val, _ = torch.load(vec_dir + file_name)
