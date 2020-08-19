@@ -11,9 +11,6 @@ from sklearn.linear_model import LinearRegression
 import os
 
 
-#key_list = ['int', 'long', 'float', 'short', 'double']
-key_list = ['short', 'return', 'List', 'static', 'new', 'for', 'if', 'except', 'try']
-
 def get_vec(word2index_list, vecs_list, key):
     res = []
     for i, word2index in enumerate(word2index_list):
@@ -21,6 +18,7 @@ def get_vec(word2index_list, vecs_list, key):
         res.append([vecs[word2index[key]]])
     return res
 
+key_list = ['short', 'return', 'List', 'static', 'new', 'for', 'if', 'except', 'try']
 
 def select_common_tk(dict_1: dict, dict_2: dict):
     res = []

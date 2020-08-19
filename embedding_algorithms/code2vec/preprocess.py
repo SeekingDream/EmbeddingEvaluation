@@ -1,14 +1,11 @@
 import pickle
 import json
 import os
-from multiprocessing import Process
+from utils import BASEDICT
 
 
 def build_dict(dataset):
-    base_dict = {
-        '____UNKNOW____': 0,
-         '____PAD____': 1
-    }
+    base_dict = BASEDICT.copy()
     token2index, path2index, func2index = base_dict.copy(), base_dict.copy(), base_dict.copy()
     for i, data in enumerate(dataset):
         data = data.strip().lower()
@@ -61,11 +58,11 @@ def norm_data(data_type):
 
 
 def main():
-    with open('dataset/java-small/java-small.train.c2s', 'r') as f:
+    with open(DATA_DIR + 'java-small.train.c2s', 'r') as f:
         dataset = f.readlines()
         print('dataset number is ', len(dataset))
-    if not os.path.isdir('dataset/java-small-preprocess'):
-        os.mkdir('dataset/java-small-preprocess')
+    if not os.path.isdir(DIR):
+        os.mkdir(DIR)
     build_dict(dataset)
     norm_data('train')
     norm_data('val')
@@ -74,4 +71,5 @@ def main():
 
 if __name__ == '__main__':
     DIR = 'dataset/java-small-preprocess/'
+    DATA_DIR = 'dataset/java-small/'
     main()

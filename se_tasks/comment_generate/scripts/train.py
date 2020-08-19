@@ -21,6 +21,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 
+from utils import BASEDICT
 from se_tasks.comment_generate.scripts.options import train_opts
 from se_tasks.comment_generate.scripts.options import model_opts
 from se_tasks.comment_generate.scripts.model import Seq2seqAttn

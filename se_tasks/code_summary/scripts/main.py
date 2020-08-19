@@ -79,9 +79,9 @@ def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
 
 
 def train_model(
-    tk_path, train_path, test_path, embed_dim,
-    embed_type, vec_path, experiment_name, train_batch,
-    epochs, lr, weight_decay, max_size, out_dir
+    tk_path, train_path, test_path, embed_dim, embed_type,
+    vec_path, experiment_name, train_batch, epochs, lr,
+    weight_decay, max_size, out_dir, device_id,
 ):
     token2index, path2index, func2index, embed =\
         perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir)
@@ -98,14 +98,13 @@ def train_model(
     train_loader = DataLoader(train_dataset, batch_size=train_batch, collate_fn=my_collate)
     ed_time = datetime.datetime.now()
     print('train dataset size is ', len(train_dataset), 'cost time', ed_time - st_time)
-    #test_dataset = CodeLoader(test_path)
-    #test_loader = DataLoader(test_dataset, batch_size=1000, collate_fn=my_collate)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(int(device_id) if torch.cuda.is_available() else "cpu")
+    print(device)
     model.to(device)
 
     index2func = dict2list(func2index)
-    for epoch in range(epochs):
+    for epoch in range(1, epochs + 1):
         acc, tp, fp, fn = 0, 0, 0, 0
         st_time = datetime.datetime.now()
         for i, ((sts, paths, eds), y, length) in enumerate(train_loader):
@@ -152,7 +151,8 @@ def main(args_set):
         tk_path, train_path, test_path, embed_dim,
         embed_type, vec_path, experiment_name, train_batch,
         args.epochs, args.lr,
-        args.weight_decay, None, out_dir='se_tasks/code_summary/result'
+        args.weight_decay, None, out_dir='se_tasks/code_summary/result',
+        device_id=args.device
     )
 
 
@@ -170,6 +170,7 @@ if __name__ == '__main__':
     parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
+    parser.add_argument('--device', default=0, help='gpu id')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
     parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
     parser.add_argument('--train_data', type=str, default='dataset/java-small-preprocess/train.pkl')
