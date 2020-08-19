@@ -78,13 +78,38 @@ LR=0.005
 
 
 
+# EMBED_TYPE=0
+# EMBEDDING_DIM=100
+# EMBEDDING_PATH='embedding_vec100_1/glove.vec'
+# EXPERIMENT_NAME='100_1_glove'
+# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+# echo $EXPERIMENT_NAME
+# CUDA_VISIBLE_DEVICES=2 python -m se_tasks.code_search.scripts.train \
+# --embed_type=$EMBED_TYPE --learning_rate=$LR \
+# --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
+# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+
+
+
+# EMBED_TYPE=0
+# EMBEDDING_DIM=100
+# EMBEDDING_PATH='embedding_vec100_1/ori_code2seq.vec'
+# EXPERIMENT_NAME='code2seq'
+# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+# echo $EXPERIMENT_NAME
+# CUDA_VISIBLE_DEVICES=4 python -m se_tasks.code_search.scripts.train \
+# --embed_type=$EMBED_TYPE --learning_rate=$LR \
+# --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
+# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+
+
 EMBED_TYPE=0
 EMBEDDING_DIM=100
-EMBEDDING_PATH='embedding_vec100_1/glove.vec'
-EXPERIMENT_NAME='100_1_glove'
+EMBEDDING_PATH='embedding_vec100_1/code2vec.vec'
+EXPERIMENT_NAME='code2vec'
 EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
 echo $EXPERIMENT_NAME
-CUDA_VISIBLE_DEVICES=2 python -m se_tasks.code_search.scripts.train \
+CUDA_VISIBLE_DEVICES=5 python -m se_tasks.code_search.scripts.train \
 --embed_type=$EMBED_TYPE --learning_rate=$LR \
 --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
 --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG

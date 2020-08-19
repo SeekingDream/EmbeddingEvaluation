@@ -62,7 +62,7 @@ TEST_DATA='se_tasks/code_completion/dataset/test.tsv'
 # EXPERIMENT_NAME='100_1_word2vec'
 # EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
 # echo $EXPERIMENT_NAME
-# CUDA_VISIBLE_DEVICES=2 python -m se_tasks.code_completion.scripts.main \
+# CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_completion.scripts.main \
 # --train_data=$TRAIN_DATA --test_data=$TEST_DATA --embedding_type=$EMBEDDING_TYPE \
 # --epochs=$EPOCHS --batch=$BATCH --lr=$LR \
 # --embedding_dim=$EMBEDDING_DIM --embedding_path=$EMBEDDING_PATH \
@@ -84,13 +84,39 @@ TEST_DATA='se_tasks/code_completion/dataset/test.tsv'
 
 
 
+# EMBEDDING_TYPE=0
+# EMBEDDING_DIM=100
+# EMBEDDING_PATH='embedding_vec100_1/glove.vec'
+# EXPERIMENT_NAME='100_1_glove'
+# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+# echo $EXPERIMENT_NAME
+# CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_completion.scripts.main \
+# --train_data=$TRAIN_DATA --test_data=$TEST_DATA --embedding_type=$EMBEDDING_TYPE \
+# --epochs=$EPOCHS --batch=$BATCH --lr=$LR \
+# --embedding_dim=$EMBEDDING_DIM --embedding_path=$EMBEDDING_PATH \
+# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+
+
+# EMBEDDING_TYPE=0
+# EMBEDDING_DIM=100
+# EMBEDDING_PATH='embedding_vec100_1/ori_code2seq.vec'
+# EXPERIMENT_NAME='code2seq'
+# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+# echo $EXPERIMENT_NAME
+# CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_completion.scripts.main \
+# --train_data=$TRAIN_DATA --test_data=$TEST_DATA --embedding_type=$EMBEDDING_TYPE \
+# --epochs=$EPOCHS --batch=$BATCH --lr=$LR \
+# --embedding_dim=$EMBEDDING_DIM --embedding_path=$EMBEDDING_PATH \
+# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+
+
 EMBEDDING_TYPE=0
 EMBEDDING_DIM=100
-EMBEDDING_PATH='embedding_vec100_1/glove.vec'
-EXPERIMENT_NAME='100_1_glove'
+EMBEDDING_PATH='embedding_vec100_1/code2vec.vec'
+EXPERIMENT_NAME='code2vec'
 EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
 echo $EXPERIMENT_NAME
-CUDA_VISIBLE_DEVICES=3 python -m se_tasks.code_completion.scripts.main \
+CUDA_VISIBLE_DEVICES=1 python -m se_tasks.code_completion.scripts.main \
 --train_data=$TRAIN_DATA --test_data=$TEST_DATA --embedding_type=$EMBEDDING_TYPE \
 --epochs=$EPOCHS --batch=$BATCH --lr=$LR \
 --embedding_dim=$EMBEDDING_DIM --embedding_path=$EMBEDDING_PATH \
