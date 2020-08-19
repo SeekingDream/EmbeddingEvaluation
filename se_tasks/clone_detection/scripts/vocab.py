@@ -16,7 +16,7 @@ def build_vocab(file_name):
     return word2index
 
 
-def tokensize_dataset(file_name, word2index):
+def tokensize_dataset(file_name, word2index, max_num):
     def tokensize_node(node_list):
         for i, node in enumerate(node_list):
             node_list[i] = word2index[node] if node in word2index else word2index['____UNKNOW____']
@@ -24,6 +24,8 @@ def tokensize_dataset(file_name, word2index):
 
     with open(file_name, 'rb') as f:
         dataset = pickle.load(f)
+        if max_num is not None:
+            dataset = dataset[:max_num]
     for i, data in tqdm(enumerate(dataset)):
         node_1, g_1, node_2, g_2, label = data
         node_1 = tokensize_node(node_1)

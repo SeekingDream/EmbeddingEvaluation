@@ -1,14 +1,7 @@
 import argparse
-<<<<<<< HEAD
-from embedding_algorithms.code2seq.model import Code2Seq
+
 import pickle
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from embedding_algorithms.code2seq.dataset import C2SDataSet
-=======
-import pickle
-import torch.optim as optim
->>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
 import torch
 import tqdm
 

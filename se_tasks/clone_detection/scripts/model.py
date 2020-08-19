@@ -47,7 +47,10 @@ class CloneModel(nn.Module):
             local.append(node_local)  # normalize
         return local
 
-    def forward(self, node_1, node_2, graph_1, graph_2, device):
+    def forward(self, node_1, graph_1, node_2, graph_2, device):
+        node_1 = [torch.tensor(n, dtype=torch.long, device=device) for n in node_1]
+        node_2 = [torch.tensor(n, dtype=torch.long, device=device) for n in node_2]
+
         local_1 = self.get_localvec(node_1, device)
         local_1 = [self.dropout(l) for l in local_1]
         batch_graph_1 = self.perpare_dgl(graph_1, local_1, device)

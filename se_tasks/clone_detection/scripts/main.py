@@ -17,11 +17,13 @@ from se_tasks.clone_detection.scripts.model import CloneModel
 from se_tasks.clone_detection.scripts.vocab import build_vocab, tokensize_dataset
 
 
-def load_data(train_file, val_file, word2index, batch_size):
-    train_data = tokensize_dataset(train_file, word2index)
-    val_data = tokensize_dataset(val_file, word2index)
-    train_loader = DataLoader(train_data, batch_size=batch_size)
-    val_loader = DataLoader(val_data, batch_size=batch_size)
+def load_data(train_file, val_file, word2index, batch_size, max_num):
+    def my_collate_fn(batch):
+        return zip(*batch)
+    train_data = tokensize_dataset(train_file, word2index, max_num)
+    val_data = tokensize_dataset(val_file, word2index, max_num)
+    train_loader = DataLoader(train_data, batch_size=batch_size, collate_fn=my_collate_fn)
+    val_loader = DataLoader(val_data, batch_size=batch_size, collate_fn=my_collate_fn)
     print('load the dataset, train size', len(train_data),'test data size', len(val_data))
     return train_loader, val_loader
 
@@ -53,25 +55,28 @@ def perpare_exp_set(embed_type, ebed_path, train_path, embed_dim):
 
 def train_model(train_loader, model, criterion, optimizer, device):
     model.train()
+    loss_list = []
     for i, data in tqdm(enumerate(train_loader)):
         node_1, graph_1, node_2, graph_2, label = data
-
-        output = model(node_1, graph_1, node_2, graph_2)
+        label = torch.tensor(label, dtype= torch.float, device=device)
+        label = label * 2 - 1
+        output = model(node_1, graph_1, node_2, graph_2, device)
         loss = criterion(output, label)
-
+        loss_list.append(loss.item())
         optimizer.zero_grad()
         loss.backward()
-
         # torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
         optimizer.step()
+    return loss_list
 
 
 def test_model(val_loader, model, device):
     model.eval()
     for i, data in enumerate(val_loader):
         node_1, graph_1, node_2, graph_2, label = data
-        output = model(node_1, graph_1, node_2, graph_2)
-        acc = (output == label)
+        label = torch.tensor(label, dtype=torch.float, device=device)
+        output = model(node_1, graph_1, node_2, graph_2, device)
+        acc = ((output > 0) == label)
 
     return acc
 
@@ -88,7 +93,9 @@ def main(arg_set):
     )
     vocab_size = len(d_word_index)
 
-    train_loader, val_loader = load_data(train_path, val_path, d_word_index, arg_set.batch)
+    train_loader, val_loader = load_data(
+        train_path, val_path, d_word_index, arg_set.batch, 10000
+    )
 
     model = CloneModel(vocab_size, embed_dim, embedding_tensor=embed)
     optimizer = torch.optim.Adam(
@@ -97,6 +104,7 @@ def main(arg_set):
     )
     criterion = nn.MSELoss()
     device = torch.device(int(arg_set.device))
+    model.to(device)
 
     acc_curve = []
     for epoch in range(1, arg_set.epochs + 1):
@@ -104,7 +112,7 @@ def main(arg_set):
         train_model(train_loader, model, criterion, optimizer, device)
         res = test_model(val_loader, model, device)
         ed = datetime.datetime.now()
-        print(epoch, ' epoch cost time', ed - st, 'accuracy is', res.item())
+        print(epoch, ' epoch cost time', ed - st, 'accuracy is', res)
         acc_curve.append(res.item())
 
     plt.plot(acc_curve)
@@ -121,7 +129,7 @@ def main(arg_set):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--epochs', default=30, type=int, metavar='N', help='number of total epochs to run')
+    parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--batch', default=16, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
