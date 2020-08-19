@@ -72,12 +72,13 @@ def train_model(train_loader, model, criterion, optimizer, device):
 
 def test_model(val_loader, model, device):
     model.eval()
+    acc = 0
     for i, data in enumerate(val_loader):
         node_1, graph_1, node_2, graph_2, label = data
         label = torch.tensor(label, dtype=torch.float, device=device)
         output = model(node_1, graph_1, node_2, graph_2, device)
-        acc = ((output > 0) == label)
-
+        acc += ((output > 0) == label)
+    acc = acc / len(val_loader.dataset)
     return acc
 
 
@@ -130,7 +131,7 @@ def main(arg_set):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
-    parser.add_argument('--batch', default=256, type=int, metavar='N', help='mini-batch size')
+    parser.add_argument('--batch', default=512, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
