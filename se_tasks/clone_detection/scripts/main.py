@@ -45,7 +45,7 @@ def perpare_exp_set(embed_type, ebed_path, train_path, embed_dim):
 
     if embed is not None:
         if type(embed) is np.ndarray:
-            embed = torch.tensor(embed, dtype=torch.float).cuda()
+            embed = torch.tensor(embed, dtype=torch.float)
         assert embed.size(1) == embed_dim
 
     if not os.path.exists('../result'):
@@ -77,7 +77,7 @@ def test_model(val_loader, model, device):
         node_1, graph_1, node_2, graph_2, label = data
         label = torch.tensor(label, dtype=torch.float, device=device)
         output = model(node_1, graph_1, node_2, graph_2, device)
-        acc += ((output > 0) == label)
+        acc += ((output > 0) == label).sum()
     acc = acc / len(val_loader.dataset)
     return acc
 
@@ -95,7 +95,7 @@ def main(arg_set):
     vocab_size = len(d_word_index)
 
     train_loader, val_loader = load_data(
-        train_path, val_path, d_word_index, arg_set.batch, 10000
+        train_path, val_path, d_word_index, arg_set.batch, 2000
     )
 
     model = CloneModel(vocab_size, embed_dim, embedding_tensor=embed)
