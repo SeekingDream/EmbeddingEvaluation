@@ -32,13 +32,6 @@ def my_collate(batch):
     return (sts, paths, eds), y, length
 
 
-<<<<<<< HEAD
-def train_model(
-    tk_path, train_path, test_path, embed_dim, embed_type, 
-    vec_path, experiment_name, train_batch, epochs, lr, 
-    weight_decay, max_size=50000, out_dir=None
-):
-=======
 def dict2list(tk2index):
     res = {}
     for tk in tk2index:
@@ -61,7 +54,6 @@ def new_acc(pred, y, index2func):
 
 
 def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
->>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     with open(tk_path, 'rb') as f:
         token2index, path2index, func2index = pickle.load(f)
         embed = None
@@ -99,12 +91,7 @@ def train_model(
     criterian = nn.CrossEntropyLoss()  # loss
     optimizer = torch.optim.Adam(
         filter(lambda p: p.requires_grad, model.parameters()), 
-<<<<<<< HEAD
-        lr=lr,
-        weight_decay=weight_decay
-=======
         lr=lr, weight_decay=weight_decay
->>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     )
     st_time = datetime.datetime.now()
     train_dataset = CodeLoader(train_path, max_size)
@@ -117,14 +104,9 @@ def train_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-<<<<<<< HEAD
-    for epoch in range(epochs):
-        acc = 0
-=======
     index2func = dict2list(func2index)
     for epoch in range(epochs):
         acc, tp, fp, fn = 0, 0, 0, 0
->>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
         st_time = datetime.datetime.now()
         for i, ((sts, paths, eds), y, length) in enumerate(train_loader):
             sts = sts.to(device)
@@ -165,21 +147,12 @@ def main(args_set):
     vec_path = args_set.embed_path
     experiment_name = args.experiment_name
     train_batch = args.batch
-<<<<<<< HEAD
-    epochs = args.epochs
-    lr = args.lr
-    weight_decay=args.weight_decay
-    train_model(
-        tk_path, train_path, test_path, embed_dim, embed_type, 
-        vec_path, experiment_name, train_batch, epochs, lr, weight_decay
-=======
 
     train_model(
         tk_path, train_path, test_path, embed_dim,
         embed_type, vec_path, experiment_name, train_batch,
         args.epochs, args.lr,
         args.weight_decay, None, out_dir='se_tasks/code_summary/result'
->>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     )
 
 
