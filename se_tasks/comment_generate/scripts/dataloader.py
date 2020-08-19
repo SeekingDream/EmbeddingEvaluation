@@ -63,7 +63,7 @@ class TextClassDataLoader(object):
 
         # for batch
         self.n_samples = len(self.samples)
-        print('data number is ', self.n_samples)
+        print('dataset number is ', self.n_samples)
         self.n_batches = int(self.n_samples / self.batch_size)
         self.max_length = self._get_max_length()
         self._shuffle_indices()

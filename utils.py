@@ -4,6 +4,13 @@ import random
 import javalang
 
 
+BASEDICT = {
+    '____UNKNOW____': 0,
+    '____PAD____': 1,
+    '____ST____': 2,
+    '____ED____': 3
+}
+
 def set_random_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -24,9 +31,21 @@ def parse_statement(code):
 
 def parse_source(source_code):
     for i, code in enumerate(source_code):
+        code = code.strip().lower()
         code = parse_statement(code)
         source_code[i] = code
     return source_code
+
+
+def trans_vocab(vocab, vectors):
+    new_vocab = BASEDICT.copy()
+    for tk in vocab:
+        new_vocab[tk] = vocab[tk].index + len(BASEDICT)
+    dim = vectors.shape[1]
+    tmp_vec = np.random.rand(len(BASEDICT), dim)
+    vec = np.concatenate([tmp_vec, vectors])
+    return new_vocab, vec
+
 
 
 #

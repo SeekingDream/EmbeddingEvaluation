@@ -1,6 +1,3 @@
-from se_tasks.code_summary.scripts.CodeLoader import CodeLoader
-from torch.utils.data import DataLoader
-from se_tasks.code_summary.scripts.Code2VecModule import Code2Vec
 import pickle
 import torch
 from torch import optim
@@ -12,6 +9,11 @@ from utils import set_random_seed
 import numpy as np
 import os
 from tqdm import tqdm
+from torch.utils.data import DataLoader
+
+
+from se_tasks.code_summary.scripts.CodeLoader import CodeLoader
+from se_tasks.code_summary.scripts.Code2VecModule import Code2Vec
 
 
 def my_collate(batch):
@@ -30,10 +32,36 @@ def my_collate(batch):
     return (sts, paths, eds), y, length
 
 
+<<<<<<< HEAD
 def train_model(
     tk_path, train_path, test_path, embed_dim, embed_type, 
-    vec_path, experiment_name, train_batch
+    vec_path, experiment_name, train_batch, epochs, lr, 
+    weight_decay, max_size=50000, out_dir=None
 ):
+=======
+def dict2list(tk2index):
+    res = {}
+    for tk in tk2index:
+        res[tk2index[tk]] = tk
+    return res
+
+
+def new_acc(pred, y, index2func):
+    pred = pred.detach().cpu().numpy()
+    y = y.detach().cpu().numpy()
+    tp, fp, fn = 0, 0, 0
+    acc = np.sum(pred == y)
+    for i, pred_i in enumerate(pred):
+        pred_i = set(index2func[pred_i].split('|'))
+        y_i = set(index2func[y[i]].split('|'))
+        tp += len(pred_i & y_i)
+        fp += len(pred_i - y_i)
+        fn = len(y_i - pred_i)
+    return acc, tp, fp, fn
+
+
+def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     with open(tk_path, 'rb') as f:
         token2index, path2index, func2index = pickle.load(f)
         embed = None
@@ -45,7 +73,7 @@ def train_model(
     elif embed_type == 1:
         print('create new embedding vectors, training from scratch')
     elif embed_type == 2:
-        embed = torch.randn([len(token2index) + 2, args.embed_dim]).cuda()
+        embed = torch.randn([len(token2index) + 2, embed_dim]).cuda()
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
@@ -53,31 +81,50 @@ def train_model(
         if type(embed) is np.ndarray:
             embed = torch.tensor(embed, dtype=torch.float).cuda()
         assert embed.size()[1] == embed_dim
-    if not os.path.exists('se_tasks/code_summary/result'):
-        os.mkdir('se_tasks/code_summary/result')
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+    return token2index, path2index, func2index, embed
 
+
+def train_model(
+    tk_path, train_path, test_path, embed_dim,
+    embed_type, vec_path, experiment_name, train_batch,
+    epochs, lr, weight_decay, max_size, out_dir
+):
+    token2index, path2index, func2index, embed =\
+        perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir)
     nodes_dim, paths_dim, output_dim = len(token2index), len(path2index), len(func2index)
 
-    model = Code2Vec(nodes_dim + 2, paths_dim + 2, embed_dim, output_dim + 1, embed)
+    model = Code2Vec(nodes_dim, paths_dim, embed_dim, output_dim, embed)
     criterian = nn.CrossEntropyLoss()  # loss
     optimizer = torch.optim.Adam(
         filter(lambda p: p.requires_grad, model.parameters()), 
-        lr=args.lr,
-        weight_decay=args.weight_decay
+<<<<<<< HEAD
+        lr=lr,
+        weight_decay=weight_decay
+=======
+        lr=lr, weight_decay=weight_decay
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     )
-
-    train_dataset = CodeLoader(train_path)
+    st_time = datetime.datetime.now()
+    train_dataset = CodeLoader(train_path, max_size)
     train_loader = DataLoader(train_dataset, batch_size=train_batch, collate_fn=my_collate)
-    print('train data size is ', len(train_dataset))
-
+    ed_time = datetime.datetime.now()
+    print('train dataset size is ', len(train_dataset), 'cost time', ed_time - st_time)
     #test_dataset = CodeLoader(test_path)
     #test_loader = DataLoader(test_dataset, batch_size=1000, collate_fn=my_collate)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    for epoch in range(args.epochs):
+<<<<<<< HEAD
+    for epoch in range(epochs):
         acc = 0
+=======
+    index2func = dict2list(func2index)
+    for epoch in range(epochs):
+        acc, tp, fp, fn = 0, 0, 0, 0
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
         st_time = datetime.datetime.now()
         for i, ((sts, paths, eds), y, length) in enumerate(train_loader):
             sts = sts.to(device)
@@ -89,13 +136,24 @@ def train_model(
             loss.backward()
             optimizer.step()
             pos, pred_y = torch.max(pred_y, 1)
-            acc += torch.sum(pred_y == y)
+            acc_add, tp_add, fp_add, fn_add = new_acc(pred_y, y, index2func)
+            tp += tp_add
+            fp += fp_add
+            fn += fn_add
+            acc += acc_add
+        acc = acc / len(train_dataset)
+        prec = tp / (tp + fp)
+        recall = tp / (tp + fn)
         ed_time = datetime.datetime.now()
         print(
             'epoch', epoch, 
-            'acc:', acc.float().item() / len(train_dataset), 
-            'cost time', ed_time - st_time
+            'acc:', acc,
+            'cost time', ed_time - st_time,
+            'p', prec,
+            'r', recall,
+            'new_f1', prec * recall * 2 / (prec + recall)
         )
+    return model, token2index
 
 
 def main(args_set):
@@ -107,16 +165,28 @@ def main(args_set):
     vec_path = args_set.embed_path
     experiment_name = args.experiment_name
     train_batch = args.batch
+<<<<<<< HEAD
+    epochs = args.epochs
+    lr = args.lr
+    weight_decay=args.weight_decay
     train_model(
         tk_path, train_path, test_path, embed_dim, embed_type, 
-        vec_path, experiment_name, train_batch
+        vec_path, experiment_name, train_batch, epochs, lr, weight_decay
+=======
+
+    train_model(
+        tk_path, train_path, test_path, embed_dim,
+        embed_type, vec_path, experiment_name, train_batch,
+        args.epochs, args.lr,
+        args.weight_decay, None, out_dir='se_tasks/code_summary/result'
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     )
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=3, type=int, metavar='N', help='number of total epochs to run')
-    parser.add_argument('--batch', default=16, type=int, metavar='N', help='mini-batch size')
+    parser.add_argument('--batch', default=512, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')

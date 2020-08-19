@@ -29,11 +29,11 @@ class LMIterator(object):
                  can_fit = False):
         """
         :type batch_size: int
-        :param batch_size: Make the data iterator return minibatches of this
+        :param batch_size: Make the dataset iterator return minibatches of this
             size. A minibatch has time as its first dimenion, the different
             examples as the second and the example dimensionality as the
             last. If set to 1, the iterator will return a matrix, where
-            first dimension is time and second dimension is the data
+            first dimension is time and second dimension is the dataset
             dimensionality
 
         :type path: string
@@ -62,7 +62,7 @@ class LMIterator(object):
             next one, `shift` is 2 means predict the word at position t+2
 
         :type reset: int or None
-        :param reset: If negative, the data iterator will stop after it
+        :param reset: If negative, the dataset iterator will stop after it
            looped over all examples in the dataset. If positive, the
            iterator will only loop over the first `reset` examples of the
            dataset.
@@ -139,7 +139,7 @@ class LMIterator(object):
         if self.reset is not None and self.reset > 0:
             self.data = self.data[:self.reset]
             self.data_len = self.data.shape[0]
-        print ("data length is ", self.data_len)
+        print ("dataset length is ", self.data_len)
         del penn_data
 
     def get_length(self):

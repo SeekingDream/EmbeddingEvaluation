@@ -20,21 +20,37 @@ def main(args_set):
     test_path = args_set.test_data
     embed_dim = args_set.embed_dim
     train_batch = args.batch
+    out_dir = '../../embedding_vec/' + str(args_set.embed_dim) + '_1/'
     model, token2index = train_model(
         tk_path, train_path, test_path,
         embed_dim, embed_type=1, vec_path=None,
         experiment_name='code2vec',
+<<<<<<< HEAD
         train_batch=train_batch, epochs=5,    #todo : replace epochs
         lr=args.lr, weight_decay=args.weight_decay, max_size=50000,
-        out_dir='../../embedding_vec/' + str(args_set.embed_dim) + '_1/'
+        # out_dir='embedding_vec/' + str(args_set.embed_dim) + '_1/'
+        out_dir = 'embedding_vec100_1'
+=======
+        train_batch=train_batch, epochs=args.epochs,    #todo : replace epochs
+        lr=args.lr, weight_decay=args.weight_decay, max_size=None,
+        out_dir=out_dir
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     )
-    print()
+    weight = model.node_embedding.weight.detach().cpu().numpy()
+    assert len(token2index) == len(weight)
+    torch.save([token2index, weight], out_dir + 'code2vec.vec')
+    print('finish code2vec embedding training')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--epochs', default=3, type=int, metavar='N', help='number of total epochs to run')
-    parser.add_argument('--batch', default=512, type=int, metavar='N', help='mini-batch size')
+<<<<<<< HEAD
+    parser.add_argument('--epochs', default=1, type=int, metavar='N', help='number of total epochs to run')
+    parser.add_argument('--batch', default=64, type=int, metavar='N', help='mini-batch size')
+=======
+
+    parser.add_argument('--batch', default=400, type=int, metavar='N', help='mini-batch size')
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
     parser.add_argument('--hidden-size', default=128, type=int, metavar='N', help='rnn hidden size')
@@ -42,11 +58,20 @@ if __name__ == '__main__':
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
 
     #todo: need change
+<<<<<<< HEAD
+    parser.add_argument('--train_data', type=str, default='dataset/java-small-preprocess/train.pkl')
+    parser.add_argument('--test_data', type=str, default='dataset/java-small-preprocess/val.pkl')
+    parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
+    parser.add_argument('--tk_dict', type=str, default='dataset/java-small-preprocess/tk.pkl')
+    ######################
+=======
+    parser.add_argument('--epochs', default=10, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--train_data', type=str, default='../../dataset/java-small-preprocess/train.pkl')
     parser.add_argument('--test_data', type=str, default='../../dataset/java-small-preprocess/val.pkl')
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
     parser.add_argument('--tk_dict', type=str, default='../../dataset/java-small-preprocess/tk.pkl')
-    ######################
+    ##########
+>>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
     args = parser.parse_args()
     # set_random_seed(10)
     main(args)

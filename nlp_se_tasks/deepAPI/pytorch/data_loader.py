@@ -21,7 +21,7 @@ class APIDataset(data.Dataset):
         """read training sentences(list of int array) from a hdf5 file"""
         self.max_seq_len=max_seq_len
         
-        print("loading data...")
+        print("loading dataset...")
         api_table = tables.open_file(api_file)
         self.api_data = api_table.get_node('/phrases')[:].astype(np.long)
         self.api_index = api_table.get_node('/indices')[:]

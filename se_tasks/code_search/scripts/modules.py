@@ -82,9 +82,9 @@ class SeqEncoder(nn.Module):
         for name, param in self.lstm.named_parameters(): # initialize the gate weights 
             # adopted from https://gist.github.com/jeasinema/ed9236ce743c8efaf30fa2ff732749f5
             #if len(param.shape)>1:
-            #    weight_init.orthogonal_(param.data) 
+            #    weight_init.orthogonal_(param.dataset)
             #else:
-            #    weight_init.normal_(param.data)                
+            #    weight_init.normal_(param.dataset)
             # adopted from fairseq
             if 'weight' in name or 'bias' in name: 
                 param.data.uniform_(-0.1, 0.1)

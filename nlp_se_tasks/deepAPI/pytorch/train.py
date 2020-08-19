@@ -66,13 +66,13 @@ def train(args):
     config = getattr(configs, 'config_'+args.model)()
 
     ###############################################################################
-    # Load data
+    # Load dataset
     ###############################################################################
     train_set=APIDataset(args.data_path+'train.desc.h5', args.data_path+'train.apiseq.h5', config['max_sent_len'])
     valid_set=APIDataset(args.data_path+'test.desc.h5', args.data_path+'test.apiseq.h5', config['max_sent_len'])
     train_loader=torch.utils.data.DataLoader(dataset=train_set, batch_size=config['batch_size'], shuffle=True, num_workers=1)
     valid_loader=torch.utils.data.DataLoader(dataset=valid_set, batch_size=config['batch_size'], shuffle=True, num_workers=1)
-    print("Loaded data!")
+    print("Loaded dataset!")
 
     ###############################################################################
     # Define the models
@@ -107,9 +107,9 @@ def train(args):
         epoch_start_time = time.time()
         itr_start_time = time.time()
 
-        # shuffle (re-define) data between epochs   
+        # shuffle (re-define) dataset between epochs
 
-        for batch in train_loader:# loop through all batches in training data
+        for batch in train_loader:# loop through all batches in training dataset
             model.train()
             batch_gpu = [tensor.to(device) for tensor in batch]
             loss = model(*batch_gpu)  
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='DeepAPI Pytorch')
     # Path Arguments
-    parser.add_argument('--data_path', type=str, default='./data/', help='location of the data corpus')
+    parser.add_argument('--data_path', type=str, default='./dataset/', help='location of the dataset corpus')
     parser.add_argument('--model', type=str, default='RNNEncDec', help='model name: RNNEncDec')
     parser.add_argument('--expname', type=str, default='basic', help='experiment name, for disinguishing different parameter settings')
     parser.add_argument('-v', '--visual', action='store_true', default=False, help='visualize training status in tensorboard')

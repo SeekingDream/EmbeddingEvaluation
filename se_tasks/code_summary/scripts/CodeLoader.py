@@ -1,12 +1,17 @@
 from torch.utils.data import Dataset
 import pickle
+import random
 
 
 class CodeLoader(Dataset):
-    def __init__(self, file_name, max_size = 10000):
+    def __init__(self, file_name, max_size):
         with open(file_name, 'rb') as f:
             dataset = pickle.load(f)
-            self.dataset = dataset[:max_size]
+            self.dataset = dataset
+            random.shuffle(self.dataset)
+
+        if max_size is not None:
+            self.dataset = self.dataset[:max_size]
 
     def __getitem__(self, index):
         data = self.dataset[index]
