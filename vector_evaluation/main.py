@@ -1,6 +1,6 @@
 import os
 import torch
-from vector_evaluation import SemanticCosine
+from vector_evaluation.SemanticMetric import SemanticCosine
 import joblib
 
 vec_dir = '/glusterfs/data/wei/EmbeddingData/embedding_vec/100_1/'

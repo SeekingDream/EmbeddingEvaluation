@@ -28,6 +28,7 @@ def main(args_set):
         train_batch=train_batch, epochs=args.epochs,
         lr=args.lr, weight_decay=args.weight_decay, max_size=None,
         out_dir=out_dir, device_id=args.device,
+
     )
     weight = model.node_embedding.weight.detach().cpu().numpy()
     assert len(token2index) == len(weight)
@@ -38,7 +39,7 @@ def main(args_set):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('--batch', default=400, type=int, metavar='N', help='mini-batch size')
+    parser.add_argument('--batch', default=64, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
     parser.add_argument('--hidden-size', default=128, type=int, metavar='N', help='rnn hidden size')
@@ -47,12 +48,16 @@ if __name__ == '__main__':
     parser.add_argument('--device', default=0, help='gpu id')
 
     #todo: need change
+
+    parser.add_argument('--train_data', type=str, default='dataset/java-small-preprocess/train.pkl')
+    parser.add_argument('--test_data', type=str, default='dataset/java-small-preprocess/val.pkl')
+    parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
+    parser.add_argument('--tk_dict', type=str, default='dataset/java-small-preprocess/tk.pkl')
     parser.add_argument('--epochs', default=10, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--train_data', type=str, default='../../dataset/java-small-preprocess/train.pkl')
     parser.add_argument('--test_data', type=str, default='../../dataset/java-small-preprocess/val.pkl')
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
     parser.add_argument('--tk_dict', type=str, default='../../dataset/java-small-preprocess/tk.pkl')
-    ##########
     args = parser.parse_args()
     # set_random_seed(10)
     main(args)

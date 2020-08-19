@@ -163,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
-    parser.add_argument('--embedding_path', type=str, default='embedding_vec100_1/fasttext.vec')
+    parser.add_argument('--embedding_path', type=str, default='embedding_vec/100_1/fasttext.vec')
     parser.add_argument('--train_data', type=str, default='se_tasks/code_authorship/dataset/train.tsv', help='model name')
     parser.add_argument('--test_data', type=str, default='se_tasks/code_authorship/dataset/test.tsv', help='model name')
     parser.add_argument('--embedding_type', type=int, default=0, choices=[0, 1, 2])
