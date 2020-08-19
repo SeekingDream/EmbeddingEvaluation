@@ -79,7 +79,7 @@ def test_model(val_loader, model, device):
         output = model(node_1, graph_1, node_2, graph_2, device)
         acc += ((output > 0) == label).sum().float()
     acc = acc / len(val_loader.dataset)
-    return acc
+    return acc.item()
 
 
 def main(arg_set):
