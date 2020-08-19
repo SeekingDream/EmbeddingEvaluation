@@ -1,14 +1,7 @@
 import argparse
-<<<<<<< HEAD
-from embedding_algorithms.code2seq.model import Code2Seq
+
 import pickle
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from embedding_algorithms.code2seq.dataset import C2SDataSet
-=======
-import pickle
-import torch.optim as optim
->>>>>>> 8e595a0e026ff25880c22a407675e1119b954b20
 import torch
 import tqdm
 
@@ -105,7 +98,7 @@ def main():
     scheduler = optim.lr_scheduler.StepLR(
         optimizer, step_size=1, gamma=0.95, last_epoch=-1)
 
-    for epoch in range(args.epoch):
+    for epoch in range(1, args.epoch+1):
         if not args.eval:
             sum_loss = 0
             train_count = 0
@@ -140,8 +133,11 @@ def main():
         if args.savename != "":
             torch.save(c2s.state_dict(), args.savename + str(epoch) + ".model")
 
-    w = c2s.terminal_element_embedding.weight.detach().cpu().numpy()
-    torch.save([terminal_dict, w], '../../embedding_vec/'+str(args.embed_dim)+'_1/ori_code2seq.vec')
+        if (epoch % 2) == 0:
+            w = c2s.terminal_element_embedding.weight.detach().cpu().numpy()
+            save_dir = '../../embedding_vec/' + str(args.embed_dim) + '_' + str(epoch) + '/'
+            save_file = save_dir + 'ori_code2seq.vec'
+            torch.save([terminal_dict, w], save_file)
 
 
 def calculate_results(true_positive, false_positive, false_negative):

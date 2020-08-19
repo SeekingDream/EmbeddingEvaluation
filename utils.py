@@ -11,6 +11,7 @@ BASEDICT = {
     '____ED____': 3
 }
 
+
 def set_random_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -47,6 +48,21 @@ def trans_vocab(vocab, vectors):
     return new_vocab, vec
 
 
+def collect_common_tk(word2index_list):
+    def appear_all(k):
+        for tar_dict in word2index_list:
+            if k not in tar_dict:
+                return False
+        return True
+
+    common_tk = []
+    word2index = word2index_list[0]
+    for tk in word2index:
+        if tk in BASEDICT:
+            continue
+        if appear_all(tk):
+            common_tk.append(tk)
+    return common_tk
 
 #
 # def configure_exp(embed_type, embed_path):

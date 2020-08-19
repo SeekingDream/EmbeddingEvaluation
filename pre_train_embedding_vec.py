@@ -7,7 +7,7 @@ from embedding_algorithms import *
 from utils import set_random_seed
 
 
-EMBED_DIR = 'embedding_vec'
+EMBED_DIR = 'embedding_vec/'
 DATA_DIR = 'dataset/code_embedding_java_small'
 
 if not os.path.isdir(EMBED_DIR):
@@ -33,8 +33,6 @@ def train_vec(vec_dim, epoch, data_dir, dir_name):
 
         model = Word2VecEmbedding(data_dir, None, None, vec_dim=vec_dim, epoch=epoch)
         produce_vec(model, model_type=0, dir_name=dir_name)
-
-        model = Word2VecEmbedding(data_dir, None, None, vec_dim=vec_dim, epoch=epoch)
         produce_vec(model, model_type=1, dir_name=dir_name)
 
     elif args.version == 1:         #py3.6
@@ -44,8 +42,6 @@ def train_vec(vec_dim, epoch, data_dir, dir_name):
 
         model = Doc2VecEmbedding(data_dir, None, None, vec_dim=vec_dim, epoch=epoch)
         produce_vec(model, model_type=0, dir_name=dir_name)
-
-        model = Doc2VecEmbedding(data_dir, None, None, vec_dim=vec_dim, epoch=epoch)
         produce_vec(model, model_type=1, dir_name=dir_name)
 
     else:
@@ -54,7 +50,7 @@ def train_vec(vec_dim, epoch, data_dir, dir_name):
 
 def main():
     for dim in [100,  200,  300]:
-        for epoch in [1]:
+        for epoch in [2, 4, 6]:
             dir_name = EMBED_DIR + str(dim) + '_' + str(epoch) + '/'
             if not os.path.isdir(dir_name):
                 os.mkdir(dir_name)

@@ -2,6 +2,7 @@ import pickle
 import json
 import os
 from multiprocessing import Process
+from utils import BASEDICT
 
 
 def get_tk_list(token_str):
@@ -16,12 +17,7 @@ def update_dict(old_dict, tk_list):
 
 
 def build_dict(dataset):
-    base_dict = {
-        '____UNKNOW____': 0,
-        '____PAD____': 1,
-        '____ST____': 2,
-        '____ED____': 3
-    }
+    base_dict = BASEDICT.copy()
     token2index, path2index, func2index = base_dict.copy(), base_dict.copy(), base_dict.copy()
     for i, data in enumerate(dataset):
         data = data.strip().lower()

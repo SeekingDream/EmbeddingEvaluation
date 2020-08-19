@@ -21,20 +21,3 @@ class BasicEmbedding(nn.Module):
     def save_embedding(self, file_name):
         torch.save([self.vec], file_name)
 
-
-class TokenClass:
-    def __init__(self, dataset):
-        self.word2index = {
-            '____UNKNOW____': 0,
-            '____PAD____':    1,
-        }
-        for data in dataset:
-            for tk in data:
-                if tk not in self.word2index:
-                    self.word2index[tk] = len(self.word2index)
-
-    def __getitem__(self, ky):
-        if ky not in self.word2index:
-            return 0
-        else:
-            return self.word2index[ky]

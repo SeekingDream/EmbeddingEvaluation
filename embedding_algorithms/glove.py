@@ -1,7 +1,18 @@
 from gensim.models import word2vec
 from embedding_algorithms import BasicEmbedding
 from glove import Corpus, Glove 
-from utils import trans_vocab
+from utils import BASEDICT
+import numpy as np
+
+
+def trans_vocab(vocab, vectors):
+    new_vocab = BASEDICT.copy()
+    for tk in vocab:
+        new_vocab[tk] = vocab[tk] + len(BASEDICT)
+    dim = vectors.shape[1]
+    tmp_vec = np.random.rand(len(BASEDICT), dim)
+    vec = np.concatenate([tmp_vec, vectors])
+    return new_vocab, vec
 
 
 class GloVeEmbedding(BasicEmbedding):
