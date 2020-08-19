@@ -73,13 +73,21 @@ def train_model(train_loader, model, criterion, optimizer, device):
 def test_model(val_loader, model, device):
     model.eval()
     acc = 0
+    tp, fn, fp = 0, 0, 0
     for i, data in enumerate(val_loader):
         node_1, graph_1, node_2, graph_2, label = data
         label = torch.tensor(label, dtype=torch.float, device=device)
         output = model(node_1, graph_1, node_2, graph_2, device)
-        acc += ((output > 0) == label).sum().float()
+        output = (output > 0)
+        acc += (output == label).sum().float()
+        tp += ((output == 1) * (label == 1)).sum().float()
+        fn += ((output == 0) * (label == 1)).sum().float()
+        fp += ((output == 1) * (label == 0)).sum().float()
     acc = acc / len(val_loader.dataset)
-    return acc.item()
+    prec = tp / (tp + fn)
+    recall = tp / (tp + fp)
+    res = {'acc': acc.item(), 'p': prec.item(), 'r':recall.item()}
+    return res
 
 
 def main(arg_set):
@@ -95,7 +103,7 @@ def main(arg_set):
     vocab_size = len(d_word_index)
 
     train_loader, val_loader = load_data(
-        train_path, val_path, d_word_index, arg_set.batch, 2000
+        train_path, val_path, d_word_index, arg_set.batch, 20000
     )
 
     model = CloneModel(vocab_size, embed_dim, embedding_tensor=embed)
@@ -113,11 +121,8 @@ def main(arg_set):
         train_model(train_loader, model, criterion, optimizer, device)
         res = test_model(val_loader, model, device)
         ed = datetime.datetime.now()
-        print(epoch, ' epoch cost time', ed - st, 'accuracy is', res)
+        print(epoch, ' epoch cost time', ed - st, 'result is', res)
         acc_curve.append(res)
-
-    plt.plot(acc_curve)
-    plt.show()
 
     save_name = 'se_tasks/code_authorship/result/' + arg_set.experiment_name + '.h5'
     res = {
