@@ -97,8 +97,9 @@ def train_model(
     ed_time = datetime.datetime.now()
     print('train dataset size is ', len(train_dataset), 'cost time', ed_time - st_time)
 
-    device = torch.device(int(device_id) if torch.cuda.is_available() else "cpu")
-    print(device)
+    # device = torch.device(int(device_id) if torch.cuda.is_available() else "cpu")
+    # print(device)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
     index2func = dict2list(func2index)
