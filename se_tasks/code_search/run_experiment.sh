@@ -10,7 +10,7 @@ fi
 
 BATCH=512
 LR=0.005
-DATA_PATH = 'se_tasks/code_search/dataset/example/'
+DATA_PATH='se_tasks/code_search/dataset/example/'
 # TRAIN_DATA='se_tasks/code_search/dataset/train.tsv'
 # TEST_DATA='se_tasks/code_search/dataset/test.tsv'
 
