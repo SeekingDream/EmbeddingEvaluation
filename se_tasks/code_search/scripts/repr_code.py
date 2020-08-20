@@ -38,7 +38,7 @@ def repr_code(args):
 
     chunk_id = 0
     vecs, n_processed = [], 0 
-    for batch in tqdm(data_loader):
+    for batch in data_loader:
         batch_gpu = [tensor.to(device) for tensor in batch]
         with torch.no_grad():
             reprs = model.code_encoding(*batch_gpu).data.cpu().numpy()

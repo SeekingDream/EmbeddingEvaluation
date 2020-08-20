@@ -238,7 +238,7 @@ def train_model(args):
         #itr_global = itr_global + 1
 
         if epoch % args.valid_every == 0:
-            logger.info("validating..")
+            # logger.info("validating..")
             valid_result = validate(valid_set, model, 10000, 1, config['sim_measure'])
             print(epoch, valid_result)
             # logger.info(valid_result)
@@ -318,7 +318,7 @@ def validate(valid_set, model, pool_size, K, sim_measure):
     accs, mrrs, maps, ndcgs = [], [], [], []
     code_reprs, desc_reprs = [], []
     n_processed = 0
-    for batch in tqdm(data_loader):
+    for batch in data_loader:
         if len(batch) == 10:  # names, name_len, apis, api_len, toks, tok_len, descs, desc_len, bad_descs, bad_desc_len
             code_batch = [tensor.to(device) for tensor in batch[:6]]
             desc_batch = [tensor.to(device) for tensor in batch[6:8]]
@@ -333,7 +333,7 @@ def validate(valid_set, model, pool_size, K, sim_measure):
         n_processed += batch[0].size(0)
     code_reprs, desc_reprs = np.vstack(code_reprs), np.vstack(desc_reprs)
 
-    for k in tqdm(range(0, n_processed, pool_size)):
+    for k in range(0, n_processed, pool_size):
         code_pool, desc_pool = code_reprs[k:k + pool_size], desc_reprs[k:k + pool_size]
         for i in range(min(10000, pool_size)):  # for i in range(pool_size):
             desc_vec = np.expand_dims(desc_pool[i], axis=0)  # [1 x dim]
@@ -391,7 +391,7 @@ def parse_args():
     parser.add_argument('--pause', default=0, type=int)
     parser.add_argument('--iteration', default=0, type=str)
 
-    parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
+    parser.add_argument('--embed_path', type=str, default='embedding_vec/100_1/fasttext.vec')
     parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')

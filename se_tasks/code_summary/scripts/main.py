@@ -32,7 +32,10 @@ def my_collate(batch):
     return (sts, paths, eds), y, length
 
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 1498f9171b7070b86bfb3e82c67d5547b01a01dc
 def dict2list(tk2index):
     res = {}
     for tk in tk2index:
@@ -55,7 +58,6 @@ def new_acc(pred, y, index2func):
 
 
 def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
-
     with open(tk_path, 'rb') as f:
         token2index, path2index, func2index = pickle.load(f)
         embed = None
@@ -105,7 +107,6 @@ def train_model(
     device = torch.device(int(device_id) if torch.cuda.is_available() else "cpu")
     print(device)
     model.to(device)
-
 
     index2func = dict2list(func2index)
     for epoch in range(1, epochs + 1):
