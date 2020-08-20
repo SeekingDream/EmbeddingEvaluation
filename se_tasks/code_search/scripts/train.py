@@ -131,7 +131,7 @@ def train_model(args):
     ###############################################################################
     # Load dataset
     ###############################################################################
-    data_path = DATASET_PATH + "/train/" if IS_ON_NSML else args.data_path + args.dataset + '/'
+    data_path = DATASET_PATH + "/train/" if IS_ON_NSML else args.data_path
     train_set = eval(config['dataset_name'])(data_path, config['train_name'], config['name_len'],
                                              config['train_api'], config['api_len'],
                                              config['train_tokens'], config['tokens_len'],
@@ -361,7 +361,6 @@ def parse_args():
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('--dataset', type=str, default='example', help='name of dataset.java, python')
     parser.add_argument('--reload_from', type=int, default=-1, help='epoch to reload from')
-
     parser.add_argument('-g', '--gpu_id', type=int, default=0, help='GPU ID')
     parser.add_argument('-v', "--visual", action="store_true", default=False,
                         help="Visualize training status in tensorboard")
@@ -375,7 +374,6 @@ def parse_args():
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
 
     # Model Hyperparameters for automl tuning
-    # parser.add_argument('--emb_size', type=int, default=-1, help = 'embedding dim')
     parser.add_argument('--n_hidden', type=int, default=-1,
                         help='number of hidden dimension of code/desc representation')
     parser.add_argument('--lstm_dims', type=int, default=-1)
@@ -388,12 +386,12 @@ def parse_args():
     parser.add_argument('--iteration', default=0, type=str)
 
     ### Todo
-    parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/GloVeEmbeddingNone.vec')
+    parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/code2vec.vec')
     parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--data_path', type=str, default='../dataset/example/', help='location of the dataset corpus')
-    #### Todo 
+    #### Todo
     return parser.parse_args()
 
 

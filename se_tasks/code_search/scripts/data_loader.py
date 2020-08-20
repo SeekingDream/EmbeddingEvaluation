@@ -111,6 +111,7 @@ def save_vecs(vecs, fout):
     print('done')
     fvec.close()
 
+
 if __name__ == '__main__':
     input_dir='../dataset/github/'
     train_set=CodeSearchDataset(input_dir, 'train.methname.h5', 6, 'train.apiseq.h5', 20, 'train.tokens.h5', 30, 'train.desc.h5', 30)
