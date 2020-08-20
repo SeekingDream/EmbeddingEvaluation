@@ -32,7 +32,7 @@ class BOWEncoder(nn.Module):
             self.embedding = nn.Embedding(vocab_size, emb_size)
 
         #self.word_weights = get_word_weights(vocab_size) 
-        self.init_weights()
+        #self.init_weights()
         
     def init_weights(self):
         nn.init.uniform_(self.embedding.weight, -0.1, 0.1)
@@ -77,8 +77,8 @@ class SeqEncoder(nn.Module):
         self.init_weights()
         
     def init_weights(self):
-        nn.init.uniform_(self.embedding.weight, -0.1, 0.1)
-        nn.init.constant_(self.embedding.weight[0], 0)
+        #nn.init.uniform_(self.embedding.weight, -0.1, 0.1)
+        #nn.init.constant_(self.embedding.weight[0], 0)
         for name, param in self.lstm.named_parameters(): # initialize the gate weights 
             # adopted from https://gist.github.com/jeasinema/ed9236ce743c8efaf30fa2ff732749f5
             #if len(param.shape)>1:
