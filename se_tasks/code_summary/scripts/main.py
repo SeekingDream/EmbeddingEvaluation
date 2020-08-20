@@ -127,6 +127,7 @@ def train_model(
         acc = acc / len(train_dataset)
         prec = tp / (tp + fp)
         recall = tp / (tp + fn)
+        f1 = prec * recall * 2 / (prec + recall + 1e-8) 
         ed_time = datetime.datetime.now()
         print(
             'epoch', epoch, 
@@ -134,7 +135,7 @@ def train_model(
             'cost time', ed_time - st_time,
             'p', prec,
             'r', recall,
-            'new_f1', prec * recall * 2 / (prec + recall)
+            'new_f1', f1
         )
     return model, token2index
 
