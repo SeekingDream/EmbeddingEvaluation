@@ -39,28 +39,31 @@ def dic2list(d):
 
 def transfer(val, d_1, d_2):
     for i, v in enumerate(val):
-        val[i] = d_2[d_1[v]] if d_1[v] in d_2 else d_2['____UNKNOW____']
+        v = d_1[v].lower()
+        val[i] = d_2[v] if v in d_2 else d_2['____UNKNOW____']
     return val
 
 
 def transfer_dataset(dataset, meth_name_list, api_list, tokens_list, d_word_index):
-    dataset.apis = transfer(dataset.apis, api_list, d_word_index)
+    #dataset.apis = transfer(dataset.apis, api_list, d_word_index)
     dataset.names = transfer(dataset.names, meth_name_list, d_word_index)
     dataset.tokens = transfer(dataset.tokens, tokens_list, d_word_index)
     return dataset
 
 
 def preprocess_data(train_set, valid_set, d_word_index):
-    with open('se_tasks/code_search/dataset/example/vocab.methname.pkl', 'rb') as f:
+    #data_dir = 'se_tasks/code_search/dataset/example/'
+    data_dir = '../dataset/example/'
+    with open(data_dir + 'vocab.methname.pkl', 'rb') as f:
         meth_name_dict = pickle.load(f)
         meth_name_list = dic2list(meth_name_dict)
-    with open('se_tasks/code_search/dataset/example/vocab.desc.pkl', 'rb') as f:
+    with open(data_dir + 'vocab.desc.pkl', 'rb') as f:
         desc_dict = pickle.load(f)
         desc_list = dic2list(desc_dict)
-    with open('se_tasks/code_search/dataset/example/vocab.apiseq.pkl', 'rb') as f:
+    with open(data_dir + 'vocab.apiseq.pkl', 'rb') as f:
         api_dict = pickle.load(f)
         api_list = dic2list(api_dict)
-    with open('se_tasks/code_search/dataset/example/vocab.tokens.pkl', 'rb') as f:
+    with open(data_dir + 'vocab.tokens.pkl', 'rb') as f:
         tokens_dict = pickle.load(f)
         tokens_list = dic2list(tokens_dict)
     train_set = transfer_dataset(train_set, meth_name_list, api_list, tokens_list, d_word_index)
@@ -91,7 +94,7 @@ def set_embedding(train_set, valid_set):
         if type(embed[0]) is np.ndarray:
             embed = [torch.tensor(e, dtype=torch.float).cuda() for e in embed]
         assert embed[0].size(1) == args.embed_dim
-
+    print('vacab size is ', vocab_size)
     return train_set, valid_set, vocab_size, embed
 
 
@@ -357,7 +360,7 @@ def validate(valid_set, model, pool_size, K, sim_measure):
 
 def parse_args():
     parser = argparse.ArgumentParser("Train and Validate The Code Search (Embedding) Model")
-    parser.add_argument('--data_path', type=str, default='se_tasks/code_search/dataset/', help='location of the dataset corpus')
+    parser.add_argument('--data_path', type=str, default='../../../se_tasks/code_search/dataset/', help='location of the dataset corpus')
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('--dataset', type=str, default='example', help='name of dataset.java, python')
     parser.add_argument('--reload_from', type=int, default=-1, help='epoch to reload from')
@@ -383,16 +386,12 @@ def parse_args():
     parser.add_argument('--sim_measure', type=str, default='cos', help='similarity measure for training')
 
     parser.add_argument('--learning_rate', type=float, help='learning rate')
-    # parser.add_argument('--adam_epsilon', type=float)
-    # parser.add_argument("--weight_decay", type=float, help="Weight deay if we apply some.")
-    # parser.add_argument('--warmup_steps', type=int)
 
-    # reserved args for automl pbt
     parser.add_argument('--pause', default=0, type=int)
     parser.add_argument('--iteration', default=0, type=str)
 
-    parser.add_argument('--embed_path', type=str, default='embedding_vec/100_1/fasttext.vec')
-    parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
+    parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/GloVeEmbeddingNone.vec')
+    parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
 
