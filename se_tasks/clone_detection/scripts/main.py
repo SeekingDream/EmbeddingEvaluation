@@ -136,7 +136,7 @@ def main(arg_set):
         print(epoch, ' epoch cost time', ed - st, 'result is', res)
         acc_curve.append(res)
 
-    save_name = 'se_tasks/clone_detection/result/' + arg_set.experiment_name + '.h5'
+    save_name = arg_set.res_dir + arg_set.experiment_name + '.h5'
     res = {
         'word2index': d_word_index,
         'model': model.state_dict(),
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--device', type=int, default=7)
     parser.add_argument('--res_dir', type=str, default='../result')
-    parser.add_argument('--max_size', type=int, default=8000)
+    parser.add_argument('--max_size', type=int, default=10000)
 
     args = parser.parse_args()
     set_random_seed(10)
