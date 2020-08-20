@@ -51,9 +51,7 @@ def transfer_dataset(dataset, meth_name_list, api_list, tokens_list, d_word_inde
     return dataset
 
 
-def preprocess_data(train_set, valid_set, d_word_index):
-    #data_dir = 'se_tasks/code_search/dataset/example/'
-    data_dir = '../dataset/example/'
+def preprocess_data(train_set, valid_set, d_word_index, data_dir):
     with open(data_dir + 'vocab.methname.pkl', 'rb') as f:
         meth_name_dict = pickle.load(f)
         meth_name_list = dic2list(meth_name_dict)
@@ -77,7 +75,7 @@ def set_embedding(train_set, valid_set):
     if args.embed_type == 0:
         d_word_index, embed = torch.load(args.embed_path)
         embed = [embed, embed, embed]
-        train_set, valid_set = preprocess_data(train_set, valid_set, d_word_index)
+        train_set, valid_set = preprocess_data(train_set, valid_set, d_word_index, args.data_path)
         vocab_size = len(d_word_index)
         print('load existing embedding vectors, name is ', args.embed_path)
     elif args.embed_type == 1:
@@ -360,7 +358,6 @@ def validate(valid_set, model, pool_size, K, sim_measure):
 
 def parse_args():
     parser = argparse.ArgumentParser("Train and Validate The Code Search (Embedding) Model")
-    parser.add_argument('--data_path', type=str, default='../../../se_tasks/code_search/dataset/', help='location of the dataset corpus')
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('--dataset', type=str, default='example', help='name of dataset.java, python')
     parser.add_argument('--reload_from', type=int, default=-1, help='epoch to reload from')
@@ -390,11 +387,13 @@ def parse_args():
     parser.add_argument('--pause', default=0, type=int)
     parser.add_argument('--iteration', default=0, type=str)
 
+    ### Todo
     parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/GloVeEmbeddingNone.vec')
     parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--embed_dim', type=int, default=100)
     parser.add_argument('--experiment_name', type=str, default='code2vec')
-
+    parser.add_argument('--data_path', type=str, default='../dataset/example/', help='location of the dataset corpus')
+    #### Todo 
     return parser.parse_args()
 
 
