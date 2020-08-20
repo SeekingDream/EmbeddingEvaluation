@@ -54,6 +54,7 @@ def new_acc(pred, y, index2func):
 
 
 def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
+    tk2num = None
     with open(tk_path, 'rb') as f:
         token2index, path2index, func2index = pickle.load(f)
         embed = None
@@ -61,8 +62,10 @@ def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
         tk2num, embed = torch.load(vec_path)
         print('load existing embedding vectors, name is ', vec_path)
     elif embed_type == 1:
+        tk2num = token2index
         print('create new embedding vectors, training from scratch')
     elif embed_type == 2:
+        tk2num = token2index
         embed = torch.randn([len(token2index), embed_dim])
         print('create new embedding vectors, training the random vectors')
     else:
@@ -158,7 +161,7 @@ def main(args_set):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('')
-    parser.add_argument('--epochs', default=3, type=int, metavar='N', help='number of total epochs to run')
+    parser.add_argument('--epochs', default=20, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--batch', default=512, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
@@ -177,10 +180,10 @@ if __name__ == '__main__':
     parser.add_argument('--train_data', type=str, default='../../../dataset/java-small-preprocess/train.pkl')
     parser.add_argument('--test_data', type=str, default='../../../dataset/java-small-preprocess/val.pkl')
     parser.add_argument('--tk_path', type=str, default='../../../dataset/java-small-preprocess/tk.pkl')
-    parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
+    parser.add_argument('--embed_type', type=int, default=2, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--res_dir', type=str, default='../result')
-    parser.add_argument('--max_size', type=int, default=400000)
+    parser.add_argument('--max_size', type=int, default=100)
 
     args = parser.parse_args()
     set_random_seed(10)
