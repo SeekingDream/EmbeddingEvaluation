@@ -361,7 +361,6 @@ def parse_args():
     parser.add_argument('--model', type=str, default='JointEmbeder', help='model name')
     parser.add_argument('--dataset', type=str, default='example', help='name of dataset.java, python')
     parser.add_argument('--reload_from', type=int, default=-1, help='epoch to reload from')
-
     parser.add_argument('-g', '--gpu_id', type=int, default=0, help='GPU ID')
     parser.add_argument('-v', "--visual", action="store_true", default=False,
                         help="Visualize training status in tensorboard")
@@ -375,7 +374,6 @@ def parse_args():
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
 
     # Model Hyperparameters for automl tuning
-    # parser.add_argument('--emb_size', type=int, default=-1, help = 'embedding dim')
     parser.add_argument('--n_hidden', type=int, default=-1,
                         help='number of hidden dimension of code/desc representation')
     parser.add_argument('--lstm_dims', type=int, default=-1)
