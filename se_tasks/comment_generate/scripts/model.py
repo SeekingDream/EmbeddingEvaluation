@@ -18,7 +18,7 @@ class EncRNN(nn.Module):
 
 
     def forward(self, inputs):
-        embs = self.dropout(self.embed(inputs.cuda()))
+        embs = self.dropout(self.embed(inputs))
         enc_outs, hidden = self.rnn(embs)
         return self.dropout(enc_outs), hidden
 
@@ -81,7 +81,7 @@ class DecRNN(nn.Module):
 
     def forward(self, inputs, hidden, enc_outs):
         inputs = inputs.unsqueeze(0)
-        embs = self.dropout(self.embed(inputs.cuda()))
+        embs = self.dropout(self.embed(inputs))
         dec_out, hidden = self.rnn(embs, hidden)
 
         attn_weights = self.attn(dec_out, enc_outs).transpose(1, 0)
@@ -112,12 +112,12 @@ class Seq2seqAttn(nn.Module):
         self.hidden_dim = args.hidden_dim
         self.use_birnn = args.bidirectional
 
-    def forward(self, srcs, tgts, maxlen=80, tf_ratio=0.0):
+    def forward(self, srcs, tgts, device, maxlen=80, tf_ratio=0.0):
         slen, bsz = srcs.size()
         tlen = tgts.size(0) if isinstance(tgts, torch.Tensor) else maxlen
         tf_ratio = tf_ratio if isinstance(tgts, torch.Tensor) else 0.0
-        enc_outs, hidden = self.encoder(srcs)
-        dec_inputs = torch.ones_like(srcs[0]) * 2 # <eos> is mapped to id=2
+        enc_outs, hidden = self.encoder(srcs.to(device))
+        dec_inputs = torch.ones_like(srcs[0]) * 3 # <eos> is mapped to id=3
         outs = []
 
         if self.use_birnn:
@@ -128,7 +128,8 @@ class Seq2seqAttn(nn.Module):
             hidden = tuple(trans_hidden(hs) for hs in hidden)
 
         for i in range(int(tlen)):
-            preds, hidden = self.decoder(dec_inputs, hidden, enc_outs)
+            preds, hidden = \
+                self.decoder(dec_inputs.to(device), hidden, enc_outs)
             outs.append(preds)
             use_tf = random.random() < tf_ratio
             dec_inputs = tgts[i] if use_tf else preds.max(1)[1]
