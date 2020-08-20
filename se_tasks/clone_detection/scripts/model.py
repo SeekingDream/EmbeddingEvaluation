@@ -21,8 +21,6 @@ class CloneModel(nn.Module):
         #     GatedGraphConv(self.embed_dim, self.embed_dim, n_steps, 1, )
         #
         self.gcn = GraphConv(self.embed_dim, self.embed_dim,)
-
-
         self.dropout = nn.Dropout(0.2)
 
         self.relu = nn.ReLU()
@@ -36,6 +34,7 @@ class CloneModel(nn.Module):
         self.linear_2 = nn.Linear(int(self.embed_dim / 4 - 1), hidden_size)
 
         self.mlp = nn.Linear(int(self.embed_dim * 2), 2)
+        self.atten = nn.Att
         self.softmax = nn.Softmax()
 
     def get_localvec(self, n_list, device):

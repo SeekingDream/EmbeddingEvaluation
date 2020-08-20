@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--batch', default=4, type=int, metavar='N', help='mini-batch size')
-    parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
+    parser.add_argument('--lr', default=0.002, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
