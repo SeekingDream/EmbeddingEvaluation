@@ -61,7 +61,6 @@ def train_model(train_loader, model, criterion, optimizer, device):
     for i, data in tqdm(enumerate(train_loader)):
         node_1, graph_1, node_2, graph_2, label = data
         label = torch.tensor(label, dtype=torch.long, device=device)
-        #label = #label * 2 - 1
         output = model(node_1, graph_1, node_2, graph_2, device)
         loss = criterion(output, label)
         loss_list += loss.item()
@@ -75,8 +74,8 @@ def train_model(train_loader, model, criterion, optimizer, device):
         fn += ((output == 0) * (label == 1)).sum().float()
         fp += ((output == 1) * (label == 0)).sum().float()
     acc = acc / len(train_loader.dataset)
-    prec = tp / (tp + fn)
-    recall = tp / (tp + fp)
+    prec = tp / (tp + fn + 1e-8)
+    recall = tp / (tp + fp + 1e-8)
     res = {'acc': acc.item(), 'p': prec.item(), 'r': recall.item()}
     print(res, loss_list/len(train_loader))
     return loss_list
@@ -96,8 +95,8 @@ def test_model(val_loader, model, device):
         fn += ((output == 0) * (label == 1)).sum().float()
         fp += ((output == 1) * (label == 0)).sum().float()
     acc = acc / len(val_loader.dataset)
-    prec = tp / (tp + fn)
-    recall = tp / (tp + fp)
+    prec = tp / (tp + fn + 1e-8)
+    recall = tp / (tp + fp + 1e-8)
     res = {'acc': acc.item(), 'p': prec.item(), 'r':recall.item()}
     return res
 
@@ -115,7 +114,7 @@ def main(arg_set):
     vocab_size = len(d_word_index)
 
     train_loader, val_loader = load_data(
-        train_path, val_path, d_word_index, arg_set.batch, 8000
+        train_path, val_path, d_word_index, arg_set.batch, arg_set.max_size
     )
 
     model = CloneModel(vocab_size, embed_dim, embedding_tensor=embed)
@@ -161,6 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--device', type=int, default=7)
     parser.add_argument('--res_dir', type=str, default='../result')
+    parser.add_argument('--max_size', type=int, default=8000)
 
     args = parser.parse_args()
     set_random_seed(10)
