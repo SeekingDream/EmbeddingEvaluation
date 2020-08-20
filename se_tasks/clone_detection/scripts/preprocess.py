@@ -38,12 +38,12 @@ def transfer_data(dataset):
 
 
 def main():
-    data = torch.load('./data/clone.data')
+    data = torch.load('../data/clone.data')
     data = transfer_data(data)
     train_data, test_data = train_test_split(data, test_size=0.2,)
-    with open('./data/train.pkl', 'wb') as f:
+    with open('../data/train.pkl', 'wb') as f:
         pickle.dump(train_data, f)
-    with open('./data/test.pkl', 'wb') as f:
+    with open('../data/test.pkl', 'wb') as f:
         pickle.dump(test_data, f)
 
     print('successful get the data')

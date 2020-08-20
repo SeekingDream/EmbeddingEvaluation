@@ -100,14 +100,14 @@ def main(args):
         eos_token='____ED____',
         pad_token="____PAD____",
         unk_token="____UNKNOW____",
-        lower=False
+        lower=True
     )
     TGT = data.Field(
         init_token='____ST____',
         eos_token='____ED____',
         pad_token="____PAD____",
         unk_token="____UNKNOW____",
-        lower=False
+        lower=True
     )
     fields = [('src', SRC), ('tgt', TGT)]
 
@@ -125,6 +125,7 @@ def main(args):
         train_data.label, min_freq=args.tgt_min_freq,
         specials=['____UNKNOW____', '____PAD____'],
     )
+
     embed = None
     pre_embed_path = args.embed_path
     if args.embed_type == 0:
