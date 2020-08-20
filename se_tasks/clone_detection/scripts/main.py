@@ -56,6 +56,8 @@ def perpare_exp_set(embed_type, ebed_path, train_path, embed_dim):
 def train_model(train_loader, model, criterion, optimizer, device):
     model.train()
     loss_list = []
+    acc = 0
+    tp, fn, fp = 0, 0, 0
     for i, data in tqdm(enumerate(train_loader)):
         node_1, graph_1, node_2, graph_2, label = data
         label = torch.tensor(label, dtype= torch.float, device=device)
@@ -67,6 +69,17 @@ def train_model(train_loader, model, criterion, optimizer, device):
         loss.backward()
         # torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
         optimizer.step()
+
+        output = ((output > 0) * 2 - 1)
+        acc += (output == label).sum().float()
+        tp += ((output == 1) * (label == 1)).sum().float()
+        fn += ((output == -1) * (label == 1)).sum().float()
+        fp += ((output == 1) * (label == -1)).sum().float()
+    acc = acc / len(train_loader.dataset)
+    prec = tp / (tp + fn)
+    recall = tp / (tp + fp)
+    res = {'acc': acc.item(), 'p': prec.item(), 'r': recall.item()}
+    print(res)
     return loss_list
 
 
@@ -103,7 +116,7 @@ def main(arg_set):
     vocab_size = len(d_word_index)
 
     train_loader, val_loader = load_data(
-        train_path, val_path, d_word_index, arg_set.batch, 20000
+        train_path, val_path, d_word_index, arg_set.batch, 10000
     )
 
     model = CloneModel(vocab_size, embed_dim, embedding_tensor=embed)
@@ -136,8 +149,8 @@ def main(arg_set):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
-    parser.add_argument('--batch', default=512, type=int, metavar='N', help='mini-batch size')
-    parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
+    parser.add_argument('--batch', default=256, type=int, metavar='N', help='mini-batch size')
+    parser.add_argument('--lr', default=0.01, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
