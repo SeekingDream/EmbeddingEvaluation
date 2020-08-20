@@ -150,7 +150,7 @@ def main(args_set):
     train_model(
         tk_path, train_path, test_path, embed_dim,
         embed_type, vec_path, experiment_name, train_batch,
-        epochs, lr, weight_decay, max_size=None,
+        epochs, lr, weight_decay, max_size=args_set.max_size,
         out_dir=args_set.res_dir, device_id=args_set.device
     )
 
@@ -179,6 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--res_dir', type=str, default='../result')
+    parser.add_argument('--max_size', type=int, default=400000)
 
     args = parser.parse_args()
     set_random_seed(10)
