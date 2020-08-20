@@ -48,38 +48,37 @@ def perpare_exp_set(embed_type, ebed_path, train_path, embed_dim):
             embed = torch.tensor(embed, dtype=torch.float)
         assert embed.size(1) == embed_dim
 
-    if not os.path.exists('se_tasks/clone_detection/result'):
-        os.mkdir('se_tasks/clone_detection/result')
+    if not os.path.exists(args.res_dir):
+        os.mkdir(args.res_dir)
     return d_word_index, embed
 
 
 def train_model(train_loader, model, criterion, optimizer, device):
     model.train()
-    loss_list = []
+    loss_list = 0
     acc = 0
     tp, fn, fp = 0, 0, 0
     for i, data in tqdm(enumerate(train_loader)):
         node_1, graph_1, node_2, graph_2, label = data
-        label = torch.tensor(label, dtype= torch.float, device=device)
-        label = label * 2 - 1
+        label = torch.tensor(label, dtype=torch.long, device=device)
+        #label = #label * 2 - 1
         output = model(node_1, graph_1, node_2, graph_2, device)
         loss = criterion(output, label)
-        loss_list.append(loss.item())
+        loss_list += loss.item()
         optimizer.zero_grad()
         loss.backward()
         # torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
         optimizer.step()
-
-        output = ((output > 0) * 2 - 1)
+        _, output = torch.max(output, dim=1)
         acc += (output == label).sum().float()
         tp += ((output == 1) * (label == 1)).sum().float()
-        fn += ((output == -1) * (label == 1)).sum().float()
-        fp += ((output == 1) * (label == -1)).sum().float()
+        fn += ((output == 0) * (label == 1)).sum().float()
+        fp += ((output == 1) * (label == 0)).sum().float()
     acc = acc / len(train_loader.dataset)
     prec = tp / (tp + fn)
     recall = tp / (tp + fp)
     res = {'acc': acc.item(), 'p': prec.item(), 'r': recall.item()}
-    print(res)
+    print(res, loss_list/len(train_loader))
     return loss_list
 
 
@@ -91,7 +90,7 @@ def test_model(val_loader, model, device):
         node_1, graph_1, node_2, graph_2, label = data
         label = torch.tensor(label, dtype=torch.float, device=device)
         output = model(node_1, graph_1, node_2, graph_2, device)
-        output = (output > 0)
+        _, output = torch.max(output, dim=1)
         acc += (output == label).sum().float()
         tp += ((output == 1) * (label == 1)).sum().float()
         fn += ((output == 0) * (label == 1)).sum().float()
@@ -116,7 +115,7 @@ def main(arg_set):
     vocab_size = len(d_word_index)
 
     train_loader, val_loader = load_data(
-        train_path, val_path, d_word_index, arg_set.batch, 10000
+        train_path, val_path, d_word_index, arg_set.batch, 8000
     )
 
     model = CloneModel(vocab_size, embed_dim, embedding_tensor=embed)
@@ -124,9 +123,9 @@ def main(arg_set):
         filter(lambda p: p.requires_grad, model.parameters()), lr=arg_set.lr,
         weight_decay=arg_set.weight_decay
     )
-    criterion = nn.MSELoss()
+    criterion = nn.CrossEntropyLoss()  #nn.MSELoss()
     # device = torch.device(int(arg_set.device))
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(args.device)
     model.to(device)
 
     acc_curve = []
@@ -150,17 +149,18 @@ def main(arg_set):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
-    parser.add_argument('--batch', default=256, type=int, metavar='N', help='mini-batch size')
-    parser.add_argument('--lr', default=0.01, type=float, metavar='LR', help='initial learning rate')
+    parser.add_argument('--batch', default=4, type=int, metavar='N', help='mini-batch size')
+    parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
-    parser.add_argument('--embed_path', type=str, default='embedding_vec/100_2/Word2VecEmbedding0.vec')
-    parser.add_argument('--train_data', type=str, default='se_tasks/clone_detection/data/train.pkl')
-    parser.add_argument('--test_data', type=str, default='se_tasks/clone_detection/data/test.pkl')
+    parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/Word2VecEmbedding0.vec')
+    parser.add_argument('--train_data', type=str, default='../data/train.pkl')
+    parser.add_argument('--test_data', type=str, default='../data/test.pkl')
     parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--device', type=int, default=7)
+    parser.add_argument('--res_dir', type=str, default='../result')
 
     args = parser.parse_args()
     set_random_seed(10)

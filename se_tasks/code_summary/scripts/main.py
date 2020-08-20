@@ -26,16 +26,12 @@ def my_collate(batch):
         eds.append(torch.tensor(ed, dtype=torch.int))
 
     length = [len(i) for i in sts]
-    sts = rnn_utils.pad_sequence(sts, batch_first=True).long()
-    eds = rnn_utils.pad_sequence(eds, batch_first=True).long()
-    paths = rnn_utils.pad_sequence(paths, batch_first=True).long()
+    sts = rnn_utils.pad_sequence(sts, batch_first=True, padding_value=1).long()
+    eds = rnn_utils.pad_sequence(eds, batch_first=True, padding_value=1).long()
+    paths = rnn_utils.pad_sequence(paths, batch_first=True, padding_value=1).long()
     return (sts, paths, eds), y, length
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 1498f9171b7070b86bfb3e82c67d5547b01a01dc
 def dict2list(tk2index):
     res = {}
     for tk in tk2index:
@@ -62,34 +58,31 @@ def perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir):
         token2index, path2index, func2index = pickle.load(f)
         embed = None
     if embed_type == 0:
-        token2index, embed = torch.load(vec_path)
-        tmp_vec = np.random.randn(2, embed_dim)
-        embed = np.concatenate([embed, tmp_vec], axis=0)
+        tk2num, embed = torch.load(vec_path)
         print('load existing embedding vectors, name is ', vec_path)
     elif embed_type == 1:
         print('create new embedding vectors, training from scratch')
     elif embed_type == 2:
-        embed = torch.randn([len(token2index) + 2, embed_dim]).cuda()
+        embed = torch.randn([len(token2index), embed_dim])
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
     if embed is not None:
         if type(embed) is np.ndarray:
-            embed = torch.tensor(embed, dtype=torch.float).cuda()
+            embed = torch.tensor(embed, dtype=torch.float)
         assert embed.size()[1] == embed_dim
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
-    return token2index, path2index, func2index, embed
+    return token2index, path2index, func2index, embed, tk2num
 
 
 def train_model(
     tk_path, train_path, test_path, embed_dim, embed_type,
     vec_path, experiment_name, train_batch, epochs, lr,
-    weight_decay, max_size, out_dir, device_id,
-):
-    token2index, path2index, func2index, embed =\
+    weight_decay, max_size, out_dir, device_id):
+    token2index, path2index, func2index, embed, tk2num =\
         perpare_train(tk_path, embed_type, vec_path, embed_dim, out_dir)
-    nodes_dim, paths_dim, output_dim = len(token2index), len(path2index), len(func2index)
+    nodes_dim, paths_dim, output_dim = len(tk2num), len(path2index), len(func2index)
 
     model = Code2Vec(nodes_dim, paths_dim, embed_dim, output_dim, embed)
     criterian = nn.CrossEntropyLoss()  # loss
@@ -99,7 +92,7 @@ def train_model(
         weight_decay=weight_decay
     )
     st_time = datetime.datetime.now()
-    train_dataset = CodeLoader(train_path, max_size)
+    train_dataset = CodeLoader(train_path, max_size, token2index, tk2num)
     train_loader = DataLoader(train_dataset, batch_size=train_batch, collate_fn=my_collate)
     ed_time = datetime.datetime.now()
     print('train dataset size is ', len(train_dataset), 'cost time', ed_time - st_time)
@@ -112,7 +105,7 @@ def train_model(
     for epoch in range(1, epochs + 1):
         acc, tp, fp, fn = 0, 0, 0, 0
         st_time = datetime.datetime.now()
-        for i, ((sts, paths, eds), y, length) in enumerate(train_loader):
+        for i, ((sts, paths, eds), y, length) in tqdm(enumerate(train_loader)):
             sts = sts.to(device)
             paths = paths.to(device)
             eds = eds.to(device)
@@ -155,26 +148,19 @@ def main(args_set):
     lr = args_set.lr
     weight_decay=args_set.weight_decay
     train_model(
-        tk_path, train_path, test_path, embed_dim, embed_type, 
-        vec_path, experiment_name, train_batch, epochs, lr, weight_decay
-
-
-    train_model(
         tk_path, train_path, test_path, embed_dim,
         embed_type, vec_path, experiment_name, train_batch,
-        args_set.epochs, args_set.lr,
-        args_set.weight_decay, None, out_dir='se_tasks/code_summary/result',
-        device_id=args_set.device,
+        epochs, lr, weight_decay, max_size=args_set.max_size,
+        out_dir=args_set.res_dir, device_id=args_set.device
     )
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser('')
     parser.add_argument('--epochs', default=3, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--batch', default=512, type=int, metavar='N', help='mini-batch size')
     parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
-    parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
     parser.add_argument('--hidden-size', default=128, type=int, metavar='N', help='rnn hidden size')
     parser.add_argument('--layers', default=2, type=int, metavar='N', help='number of rnn layers')
     parser.add_argument('--classes', default=250, type=int, metavar='N', help='number of output classes')
@@ -182,15 +168,19 @@ if __name__ == '__main__':
     parser.add_argument('--cuda', default=True, action='store_true', help='use cuda')
     parser.add_argument('--rnn', default='LSTM', choices=['LSTM', 'GRU'], help='rnn module type')
     parser.add_argument('--mean_seq', default=False, action='store_true', help='use mean of rnn output')
-    parser.add_argument('--device', default=0, help='gpu id')
     parser.add_argument('--clip', type=float, default=0.25, help='gradient clipping')
-    parser.add_argument('--embed_path', type=str, default='embedding_vec100_1/fasttext.vec')
-    parser.add_argument('--train_data', type=str, default='dataset/java-small-preprocess/train.pkl')
-    parser.add_argument('--test_data', type=str, default='dataset/java-small-preprocess/val.pkl')
-    parser.add_argument('--tk_path', type=str, default='dataset/java-small-preprocess/tk.pkl')
-    parser.add_argument('--embed_type', type=int, default=1, choices=[0, 1, 2])
+
+    parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
+    parser.add_argument('--device', default=6, help='gpu id')
+    parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/Doc2VecEmbedding0.vec')
+    parser.add_argument('--train_data', type=str, default='../../../dataset/java-small-preprocess/train.pkl')
+    parser.add_argument('--test_data', type=str, default='../../../dataset/java-small-preprocess/val.pkl')
+    parser.add_argument('--tk_path', type=str, default='../../../dataset/java-small-preprocess/tk.pkl')
+    parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
+    parser.add_argument('--res_dir', type=str, default='../result')
+    parser.add_argument('--max_size', type=int, default=400000)
 
     args = parser.parse_args()
-    # set_random_seed(10)
+    set_random_seed(10)
     main(args)

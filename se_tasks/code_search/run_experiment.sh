@@ -22,22 +22,22 @@ DATA_PATH='se_tasks/code_search/dataset/example/'
 # EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
 # echo $EXPERIMENT_NAME
 # CUDA_VISIBLE_DEVICES=0 python -m se_tasks.code_search.scripts.train \
-# --embed_type=$EMBED_TYPE --learning_rate=$LR \
+# --embed_type=$EMBED_TYPE --learning_rate=$LR --data_path=$DATA_PATH \
 # --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
 # --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
 
 
 
-# EMBED_TYPE=2
-# EMBEDDING_DIM=100
-# EMBEDDING_PATH='/'
-# EXPERIMENT_NAME='worst_case'
-# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
-# echo $EXPERIMENT_NAME
-# CUDA_VISIBLE_DEVICES=1 python -m se_tasks.code_search.scripts.train \
-# --embed_type=$EMBED_TYPE --learning_rate=$LR \
-# --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
-# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+EMBED_TYPE=2
+EMBEDDING_DIM=100
+EMBEDDING_PATH='/'
+EXPERIMENT_NAME='worst_case'
+EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+echo $EXPERIMENT_NAME
+CUDA_VISIBLE_DEVICES=1 python -m se_tasks.code_search.scripts.train \
+--embed_type=$EMBED_TYPE --learning_rate=$LR --data_path=$DATA_PATH \
+--embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
+--experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
 
 
 # EMBED_TYPE=0
@@ -138,13 +138,13 @@ DATA_PATH='se_tasks/code_search/dataset/example/'
 # --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
 
 
-EMBED_TYPE=0
-EMBEDDING_DIM=100
-EMBEDDING_PATH='embedding_vec/100_2/code2vec.vec'
-EXPERIMENT_NAME='code2vec'
-EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
-echo $EXPERIMENT_NAME
-CUDA_VISIBLE_DEVICES=4 python -m se_tasks.code_search.scripts.train \
---embed_type=$EMBED_TYPE --learning_rate=$LR --data_path=$DATA_PATH \
---embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
---experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG
+# EMBED_TYPE=0
+# EMBEDDING_DIM=100
+# EMBEDDING_PATH='embedding_vec/100_2/code2vec.vec'
+# EXPERIMENT_NAME='code2vec'
+# EXPERIMENT_LOG=$RES_DIR$EXPERIMENT_NAME'.txt'
+# echo $EXPERIMENT_NAME
+# CUDA_VISIBLE_DEVICES=4 python -m se_tasks.code_search.scripts.train \
+# --embed_type=$EMBED_TYPE --learning_rate=$LR --data_path=$DATA_PATH \
+# --embed_dim=$EMBEDDING_DIM --embed_path=$EMBEDDING_PATH \
+# --experiment_name=$EXPERIMENT_NAME #| tee $EXPERIMENT_LOG

@@ -34,6 +34,8 @@ class CloneModel(nn.Module):
         self.pool_2 = nn.MaxPool2d(kernel_size=(3, 2), stride=(1, 2), padding=(1, 0))
         self.linear_1 = nn.Linear(int(self.embed_dim / 2 - 1), hidden_size)
         self.linear_2 = nn.Linear(int(self.embed_dim / 4 - 1), hidden_size)
+
+        self.mlp = nn.Linear(int(self.embed_dim * 2), 2)
         self.softmax = nn.Softmax()
 
     def get_localvec(self, n_list, device):
@@ -60,7 +62,9 @@ class CloneModel(nn.Module):
         local_2 = [self.dropout(l) for l in local_2]
         batch_graph_2 = self.perpare_dgl(graph_2, local_2, device)
         vec_2 = self.calRes(batch_graph_2, device)
-        return torch.cosine_similarity(vec_1, vec_2)
+
+        vec = torch.cat([vec_1, vec_2],  dim=1)
+        return self.mlp(vec)   #torch.cosine_similarity(vec_1, vec_2)
 
     def calRes(self, batch_graph, device):
         local = batch_graph.ndata['tk'].to(device)
@@ -79,17 +83,18 @@ class CloneModel(nn.Module):
         z_vec = self.relu(z_vec)
         z_vec = self.pool_2(z_vec).view([num, -1])
 
-        y_vec = self.conv_1(local)
-        y_vec = self.relu(y_vec)
-        y_vec = self.pool_1(y_vec)
-        y_vec = self.conv_2(y_vec)
-        y_vec = self.relu(y_vec)
-        y_vec = self.pool_2(y_vec).view([num, -1])
+        # y_vec = self.conv_1(local)
+        # y_vec = self.relu(y_vec)
+        # y_vec = self.pool_1(y_vec)
+        # y_vec = self.conv_2(y_vec)
+        # y_vec = self.relu(y_vec)
+        # y_vec = self.pool_2(y_vec).view([num, -1])
 
         z_vec = self.linear_1(z_vec)
-        y_vec = self.linear_2(y_vec)
+        # y_vec = self.linear_2(y_vec)
 
-        res = (z_vec * y_vec)
+        #res = (z_vec * y_vec)
+        res = z_vec
         batch_graph.ndata['res'] = res
         res = dgl.mean_nodes(batch_graph, 'res')
         return res

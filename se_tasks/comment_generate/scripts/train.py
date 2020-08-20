@@ -30,21 +30,21 @@ from se_tasks.comment_generate.scripts.dataloader import CodeDataset
 
 def id2w(pred, field):
     sentence = [field.vocab.itos[i] for i in pred]
-    if '<eos>' in sentence:
-        return sentence[:sentence.index('<eos>')]
+    if '____ED____' in sentence:
+        return sentence[:sentence.index('____ED____')]
     return sentence
 
 
 class Trainer(object):
     def __init__(
-            self, model, criterion, optimizer, scheduler, clip):
+            self, model, criterion, optimizer, scheduler, clip, device):
         self.model = model
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.clip = clip
         self.n_updates = 0
-
+        self.device = device
 
     def get_lr(self):
         return self.optimizer.param_groups[0]['lr']
@@ -52,14 +52,14 @@ class Trainer(object):
     def step(self, samples, tf_ratio, is_train=True):
         self.optimizer.zero_grad()
         if is_train:
-            outs = self.model(samples.body, samples.label, tf_ratio)
+            outs = self.model(samples.body, samples.label, self.device, tf_ratio)
         else:
-            preds = self.model(samples.body, None, tf_ratio=0.0)
+            preds = self.model(samples.body, None, self.device, tf_ratio=0.0)
             preds = preds.max(2)[1].transpose(1, 0)
             return preds
         loss = self.criterion(
             outs.view(-1, outs.size(2)),
-            samples.label.view(-1).cuda()
+            samples.label.view(-1).to(self.device)
         )
 
         if self.model.training:
@@ -70,8 +70,8 @@ class Trainer(object):
         return loss
 
 
-def save_model(save_vars, filename):
-    model_path = os.path.join(args.savedir, filename)
+def save_model(save_vars, filename, savedir):
+    model_path = os.path.join(savedir, filename)
     torch.save(save_vars, model_path)
 
 
@@ -93,21 +93,21 @@ def save_field(savedir, fields):
 def main(args):
     #device = torch.device('cuda' if args.gpu else 'cpu')
     train_path, test_path = args.train_data, args.test_data
-
+    device = torch.device(args.device)
     # load dataset and construct vocabulary dictionary
     SRC = data.Field(
-        init_token='<sos>',
-        eos_token='<eos>',
+        init_token='____ST____',
+        eos_token='____ED____',
         pad_token="____PAD____",
         unk_token="____UNKNOW____",
-        lower=False
+        lower=True
     )
     TGT = data.Field(
-        init_token='<sos>',
-        eos_token='<eos>',
+        init_token='____ST____',
+        eos_token='____ED____',
         pad_token="____PAD____",
         unk_token="____UNKNOW____",
-        lower=False
+        lower=True
     )
     fields = [('src', SRC), ('tgt', TGT)]
 
@@ -125,6 +125,7 @@ def main(args):
         train_data.label, min_freq=args.tgt_min_freq,
         specials=['____UNKNOW____', '____PAD____'],
     )
+
     embed = None
     pre_embed_path = args.embed_path
     if args.embed_type == 0:
@@ -136,7 +137,7 @@ def main(args):
     elif args.embed_type == 1:
         print('create new embedding vectors, training from scratch')
     elif args.embed_type == 2:
-        embed = torch.randn([len(SRC.vocab.stoi), args.embed_dim]).cuda()
+        embed = torch.randn([len(SRC.vocab.stoi), args.embed_dim])
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
@@ -144,8 +145,8 @@ def main(args):
         if type(embed) is np.ndarray:
             embed = torch.tensor(embed, dtype=torch.float)
         assert embed.size()[1] == args.embed_dim
-    if not os.path.exists('se_tasks/comment_generate/result'):
-        os.mkdir('se_tasks/comment_generate/result')
+    if not os.path.exists(args.res_dir):
+        os.mkdir(args.res_dir)
     SRC.vocab.UNK = SRC.unk_token
     TGT.vocab.UNK = TGT.unk_token
     SRC.vocab.stoi.default_factory = int
@@ -162,13 +163,12 @@ def main(args):
     )
 
     model = Seq2seqAttn(args, fields)
-    model = model.cuda()
-    print(model)
+    model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss(ignore_index=TGT.vocab.stoi['____PAD____']).cuda()
+    criterion = nn.CrossEntropyLoss(ignore_index=TGT.vocab.stoi['____PAD____']).to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min')
-    trainer = Trainer(model, criterion, optimizer, scheduler, args.clip)
+    trainer = Trainer(model, criterion, optimizer, scheduler, args.clip, device)
 
     epoch = 1
     max_epoch = args.max_epoch or math.inf
@@ -208,30 +208,24 @@ def main(args):
 
         # validation
 
-        res_score = 0
         trainer.model.eval()
+        preds, reference = [], []
         for samples in valid_iter:
-            preds = trainer.step(samples, tf_ratio=0.0, is_train=False)
-            preds = [id2w(pred, TGT) for pred in preds]
+            pred = trainer.step(samples, tf_ratio=0.0, is_train=False)
+            preds += [id2w(p, TGT) for p in pred]
 
-            reference = samples.label.transpose(1, 0)
-            reference = [id2w(pred, TGT) for pred in reference]
-            reference = [[ref] for ref in reference]
-            score = bleu_score(preds, reference)
-            res_score += score
-        res_score = res_score / len(valid_iter)
-        print(res_score)
+            ref = samples.label.transpose(1, 0)
+            ref = [id2w(r, TGT) for r in ref]
+            reference += [[r] for r in ref]
+        score = bleu_score(preds, reference)
+        print('blue score:', score)
 
         # saving model
         save_vars = {
             "train_args": args,
             "state_dict": model.state_dict()
         }
-
-
-        save_model(save_vars, "checkpoint_last.pt")
-
-        # update
+        save_model(save_vars, "checkpoint_last.pt", args.res_dir)
         epoch += 1
 
 

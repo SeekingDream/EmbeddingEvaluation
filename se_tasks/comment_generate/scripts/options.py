@@ -3,10 +3,6 @@
 
 def train_opts(parser):
     group = parser.add_argument_group('Training')
-    group.add_argument('--train_data', default='se_tasks/comment_generate/dataset/train.tsv',
-                       help='path to a train dataset')
-    group.add_argument('--test_data', default='se_tasks/comment_generate/dataset/test.tsv',
-                       help='path to a validation dataset')
     group.add_argument('--batch', type=int, default=16,
                        help='batch size')
     group.add_argument('--savedir', default='se_tasks/comment_generate/result',
@@ -32,7 +28,7 @@ def translate_opts(parser):
     group = parser.add_argument_group('Translation')
     group.add_argument('--model', default='se_tasks/comment_generate/result/checkpoint_best.pt',
                        help='model file for translation')
-    group.add_argument('--input', default='se_tasks/comment_generate/sample_data/sample_test.txt',
+    group.add_argument('--input', default='../sample_data/sample_test.txt',
                        help='input file')
     group.add_argument('--batch', type=int, default=32,
                        help='batch size')
@@ -45,8 +41,7 @@ def translate_opts(parser):
 
 def model_opts(parser):
     group = parser.add_argument_group('Model\'s hyper-parameters')
-    group.add_argument('--embed_dim', type=int, default=200,
-                       help='dimension of word embeddings')
+
     group.add_argument('--src_min_freq', type=int, default=3,
                        help='''map words of source side appearing less than 
                 threshold times to unknown''')
@@ -67,8 +62,19 @@ def model_opts(parser):
                        help='dropout applied to layers (0 means no dropout)')
     group.add_argument('--tied', action='store_true',
                        help='tie the word embedding and softmax weight')
-    group.add_argument('--embed_type', type=int, choices=[0, 1, 2], default=1)
-    group.add_argument('--embed_path', type=str, default='embedding_vec100_1/word2vec.vec')
+
+    ### todo
+    group.add_argument('--embed_dim', type=int, default=100, help='dimension of word embeddings')
+    group.add_argument('--embed_type', type=int, choices=[0, 1, 2], default=0)
+    group.add_argument('--embed_path', type=str, default='../../../vec/100_2/code2vec.vec')
     group.add_argument('--experiment_name', type=str, default='best_case')
+    group.add_argument('--res_dir', type=str, default='../result')
+    group.add_argument('--train_data', default='../dataset/train.tsv',
+                       help='path to a train dataset')
+    group.add_argument('--test_data', default='../dataset/test.tsv',
+                       help='path to a validation dataset')
+    group.add_argument('--device',  default=7)
+
+    ### todo
     return group
 

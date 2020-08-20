@@ -15,11 +15,13 @@ def trainsfer_dict(word2index):
     return word2index
 
 
+file_list = []
 for file_name in os.listdir(vec_dir):
     dict_val, vec_val = torch.load(vec_dir + file_name)
     key_val = file_name
     dict_list[key_val] = dict_val
     vec_list[key_val] = vec_val
+    file_list.append(file_name)
 
 vec = []
 word2index = []
@@ -28,7 +30,6 @@ for k in vec_list:
     vec.append(vec_list[k])
     word2index.append(dict_list[k])
     index2word.append(trainsfer_dict(dict_list[k]))
-    print(k)
 
 
 metric = SemanticCosine(

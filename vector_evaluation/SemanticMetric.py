@@ -66,8 +66,8 @@ class SemanticCosine:
                 p_list.append(p1)
             p_table.append(p_list)
         detector = OutlierDetection(p_table)
-        #res = detector.pauta_criterion()
-        res = detector.isolation_criterion()
+        res = detector.pauta_criterion()
+        #res = detector.isolation_criterion()
         print(1 - np.sum(res, 0, dtype=np.float) / self.sampling_num)
 
     def is_contain(self, tk):
