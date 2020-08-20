@@ -150,7 +150,7 @@ def main(args_set):
     train_model(
         tk_path, train_path, test_path, embed_dim,
         embed_type, vec_path, experiment_name, train_batch,
-        epochs, lr,weight_decay, max_size=None,
+        epochs, lr, weight_decay, max_size=None,
         out_dir=args_set.res_dir, device_id=args_set.device
     )
 
