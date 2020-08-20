@@ -136,7 +136,7 @@ def main(arg_set):
         print(epoch, ' epoch cost time', ed - st, 'result is', res)
         acc_curve.append(res)
 
-    save_name = 'se_tasks/clone_detection/result/' + arg_set.experiment_name + '.h5'
+    save_name = arg_set.res_dir + arg_set.experiment_name + '.h5'
     res = {
         'word2index': d_word_index,
         'model': model.state_dict(),
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--batch', default=4, type=int, metavar='N', help='mini-batch size')
-    parser.add_argument('--lr', default=0.005, type=float, metavar='LR', help='initial learning rate')
+    parser.add_argument('--lr', default=0.002, type=float, metavar='LR', help='initial learning rate')
     parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay')
 
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--device', type=int, default=7)
     parser.add_argument('--res_dir', type=str, default='../result')
-    parser.add_argument('--max_size', type=int, default=8000)
+    parser.add_argument('--max_size', type=int, default=10000)
 
     args = parser.parse_args()
     set_random_seed(10)
