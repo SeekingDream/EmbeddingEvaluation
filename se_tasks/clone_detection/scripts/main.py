@@ -32,13 +32,13 @@ def perpare_exp_set(embed_type, ebed_path, train_path, embed_dim):
     if embed_type == 0:
         d_word_index, embed = torch.load(ebed_path)
         print('load existing embedding vectors, name is ', ebed_path)
-    elif args.embedding_type == 1:
+    elif embed_type == 1:
         d_word_index = build_vocab(train_path)
         embed = None
         print('create new embedding vectors, training from scratch')
-    elif args.embedding_type == 2:
+    elif embed_type == 2:
         d_word_index = build_vocab(train_path)
-        embed = torch.randn([len(d_word_index), args.embedding_dim])
+        embed = torch.randn([len(d_word_index), embed_dim])
         print('create new embedding vectors, training the random vectors')
     else:
         raise ValueError('unsupported type')
@@ -124,7 +124,8 @@ def main(arg_set):
     )
     criterion = nn.CrossEntropyLoss()  #nn.MSELoss()
     # device = torch.device(int(arg_set.device))
-    device = torch.device(args.device)
+    # device = torch.device(args.device)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
     acc_curve = []
