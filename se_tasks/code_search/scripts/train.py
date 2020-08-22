@@ -396,7 +396,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    set_random_seed(42)
+    # set_random_seed(42)
     args = parse_args()
 
     # make output directory if it doesn't already exist

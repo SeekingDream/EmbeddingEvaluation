@@ -9,14 +9,6 @@ from torch.utils.data import DataLoader
 
 class TextClassDataLoader(object):
     def __init__(self, path_file, word_to_index, batch_size=32):
-        """
-
-        Args:
-            path_file:
-            word_to_index:
-            batch_size:
-        """
-
         self.batch_size = batch_size
         self.word_to_index = word_to_index
 

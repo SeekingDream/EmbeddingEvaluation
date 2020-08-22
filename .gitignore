@@ -8,3 +8,4 @@ data/
 *.pyc
 *.h5
 *.vec
+/se_tasks/comment_generate/comment_data/

@@ -9,7 +9,7 @@ import joblib
 import torch
 from torch import nn
 import torch.backends.cudnn as cudnn
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from se_tasks.code_authorship.scripts.vocab import VocabBuilder
@@ -133,8 +133,8 @@ def main():
         print(epoch, ' epoch cost time', ed - st, 'accuracy is', res.item())
         acc_curve.append(res.item())
 
-    plt.plot(acc_curve)
-    plt.show()
+    # plt.plot(acc_curve)
+    # plt.show()
     t2 = datetime.datetime.now()
     save_name = 'se_tasks/code_authorship/result/' + args.experiment_name + '.h5'
     res = {

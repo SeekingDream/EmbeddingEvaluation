@@ -100,8 +100,9 @@ def train_model(
     ed_time = datetime.datetime.now()
     print('train dataset size is ', len(train_dataset), 'cost time', ed_time - st_time)
 
-    device = torch.device(int(device_id) if torch.cuda.is_available() else "cpu")
-    print(device)
+    # device = torch.device(int(device_id) if torch.cuda.is_available() else "cpu")
+    # print(device)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
     index2func = dict2list(func2index)
@@ -126,6 +127,7 @@ def train_model(
         acc = acc / len(train_dataset)
         prec = tp / (tp + fp)
         recall = tp / (tp + fn)
+        f1 = prec * recall * 2 / (prec + recall + 1e-8) 
         ed_time = datetime.datetime.now()
         print(
             'epoch', epoch, 
@@ -133,7 +135,7 @@ def train_model(
             'cost time', ed_time - st_time,
             'p', prec,
             'r', recall,
-            'new_f1', prec * recall * 2 / (prec + recall)
+            'new_f1', f1
         )
     return model, token2index
 
