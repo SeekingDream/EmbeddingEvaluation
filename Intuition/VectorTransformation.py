@@ -37,7 +37,7 @@ def build_corrcoef(vec_mat):
 
 
 def main():
-    VEC_DIR = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/100_2'
+    VEC_DIR = '/glusterfs/dataset/sxc180080/EmbeddingEvaluation/vec/100_2'
     vec_dim = 100
     sample_num = 1000
     dict_list, vec_list = [], []

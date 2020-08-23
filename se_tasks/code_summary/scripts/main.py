@@ -106,6 +106,7 @@ def train_model(
     model.to(device)
 
     index2func = dict2list(func2index)
+    time_cost = None
     for epoch in range(1, epochs + 1):
         acc, tp, fp, fn = 0, 0, 0, 0
         st_time = datetime.datetime.now()
@@ -137,6 +138,11 @@ def train_model(
             'r', recall,
             'new_f1', f1
         )
+        if time_cost is None:
+            time_cost = ed_time - st_time
+        else:
+            time_cost += (ed_time - st_time)
+    print('cost time', time_cost / args.epochs)
     return model, token2index
 
 
@@ -184,7 +190,7 @@ if __name__ == '__main__':
     parser.add_argument('--embed_type', type=int, default=2, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--res_dir', type=str, default='../result')
-    parser.add_argument('--max_size', type=int, default=100)
+    parser.add_argument('--max_size', type=int, default=30000)
 
     args = parser.parse_args()
     set_random_seed(10)

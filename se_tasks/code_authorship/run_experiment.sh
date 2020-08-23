@@ -1,4 +1,4 @@
-# !/bin/bash
+#!/bin/bash
 EPOCHS=50
 BATCH=32
 LR=0.005

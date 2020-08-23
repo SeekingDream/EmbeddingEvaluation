@@ -38,6 +38,14 @@ def parse_source(source_code):
     return source_code
 
 
+def update_tk2index(tk2index):
+    num = len(tk2index)
+    tk_list = list(tk2index.keys())
+    for k in tk_list:
+        new_k = ''.join(k.split('|'))
+        tk2index[new_k] = tk2index[k]
+    return num, tk2index
+
 def trans_vocab(vocab, vectors):
     new_vocab = BASEDICT.copy()
     for tk in vocab:

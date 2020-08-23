@@ -2,9 +2,9 @@ import os
 import torch
 import numpy as np
 
-vec_dir = '/glusterfs/data/wei/EmbeddingData/embedding_vec/100_1/'
+vec_dir = '/glusterfs/dataset/wei/EmbeddingData/embedding_vec/100_1/'
 
-word2vec_dict, _ = torch.load('/glusterfs/data/sxc180080/EmbeddingEvaluation/embedding_vec/100_1/' + 'word2vec.vec')
+word2vec_dict, _ = torch.load('/glusterfs/dataset/sxc180080/EmbeddingEvaluation/embedding_vec/100_1/' + 'word2vec.vec')
 
 code2seq_dict, _ = torch.load(vec_dir + 'ori_code2seq.vec')
 

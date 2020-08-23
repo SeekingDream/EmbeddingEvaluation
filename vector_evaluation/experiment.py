@@ -4,7 +4,11 @@ from gensim.models import word2vec
 import datetime
 import random
 import warnings
+import argparse
+import pickle
 
+import multiprocessing
+from multiprocessing import Manager
 warnings.filterwarnings('ignore')
 
 from utils import set_random_seed
@@ -26,14 +30,16 @@ class Metric:
             'map': 0.0,
             'ndcg': 0.0,
             'mrr': 0.0,
-            'recall_3': 0.0
+            'recall_3': 0.0,
+            'prec_3': 0.0
         }
         self.random = {
             'acc': 0.0,
             'map': 0.0,
             'ndcg': 0.0,
             'mrr': 0.0,
-            'recall_3': 0.0
+            'recall_3': 0.0,
+            'prec_3': 0.0
         }
 
     @staticmethod
@@ -72,6 +78,7 @@ class Metric:
     def update(self, preds, truth):
         self.res['acc'] += (preds[0] == truth[0])
         self.res['recall_3'] += (truth[0] in preds[:3])
+        self.res['prec_3'] += (preds[0] in truth[:3])
         self.res['map'] += self.MAP(preds[:3], truth[:3])
         self.res['mrr'] += self.MRR(preds, truth)
         self.res['ndcg'] += self.NDCG(preds[:3], truth[:3])
@@ -80,6 +87,7 @@ class Metric:
         random.shuffle(tmp)
         self.random['acc'] += (tmp[0] == truth[0])
         self.random['recall_3'] += (truth[0] in tmp[:3])
+        self.random['prec_3'] += (tmp[0] in truth[:3])
         self.random['map'] += self.MAP(tmp[:3], truth[:3])
         self.random['mrr'] += self.MRR(tmp, truth)
         self.random['ndcg'] += self.NDCG(tmp[:3], truth[:3])
@@ -209,44 +217,60 @@ class GroundTruth:
         res = np.sum(np.sum(cand_score > average, axis=1) > (candiate_num/2))
         return res
 
-    def experiment(self, candidate_num, exp_num, sample_num):
-        metric = Metric()
-        st_time = datetime.datetime.now()
-        for _ in range(exp_num):
-            candidate = np.random.choice(
-                 range(self.embed_num), size=candidate_num, replace=False)
-            #candidate = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-            candidate_score = np.zeros([candidate_num])
-            truth_score = self.norm_score[candidate]
-            for j, base in enumerate(candidate):
-                index = [i for i in range(candidate_num) if i != j]
-                baseline = candidate[index]
-                s = self.calculate_score(base, baseline, sample_num)
-                candidate_score[j] = s
-            truth_sort = list(np.argsort(truth_score * -1))
-            pred_sort = list(np.argsort(candidate_score * -1))
-            metric.update(pred_sort, truth_sort)
-        ed_time = datetime.datetime.now()
-        time_cost = (ed_time - st_time) / (exp_num * candidate_num)
-        metric.produce_final(exp_num)
-        return metric, time_cost
+
+def experiment(instance, candidate_num, exp_num, sample_num, return_dict):
+    metric = Metric()
+    st_time = datetime.datetime.now()
+    for _ in range(exp_num):
+        candidate = np.random.choice(
+             range(instance.embed_num), size=candidate_num, replace=False)
+        candidate_score = np.zeros([candidate_num])
+        truth_score = instance.norm_score[candidate]
+        for j, base in enumerate(candidate):
+            index = [i for i in range(candidate_num) if i != j]
+            baseline = candidate[index]
+            s = instance.calculate_score(base, baseline, sample_num)
+            candidate_score[j] = s
+        truth_sort = list(np.argsort(truth_score * -1))
+        pred_sort = list(np.argsort(candidate_score * -1))
+        metric.update(pred_sort, truth_sort)
+    ed_time = datetime.datetime.now()
+    time_cost = (ed_time - st_time) / (exp_num * candidate_num)
+    metric.produce_final(exp_num)
+    return_dict[candidate_num] = [metric, time_cost, candidate_num]
 
 
 def main():
+    # with open('exp.res', 'rb') as f:
+    #     return_dict = pickle.load(f)
+
     vec_dir = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/100_2/'
-    m = GroundTruth(vec_dir, dim=100, thresh=1, top_fre=50000)
-    exp_num = 200
-    sample_num = 1000
+    m = GroundTruth(vec_dir, dim=100, thresh=1, top_fre=10000)
+    exp_num = args.exp_num
+    sample_num = args.sample_num
+    manager = Manager()
+    return_dict = manager.dict()
+    jobs = []
     for candidate_num in range(3, 10):
-        metric, time_cost = m.experiment(candidate_num=candidate_num, exp_num=exp_num, sample_num=sample_num)
-        print('candidate_num', candidate_num, 'time cost:', time_cost)
-        metric.print()
-        print('=====================================')
+        p = multiprocessing.Process(
+            target=experiment,
+            args=(m, candidate_num, exp_num, sample_num, return_dict)
+        )
+        jobs.append(p)
+        p.start()
+
+    for proc in jobs:
+        proc.join()
+    print(return_dict.values())
+    with open(str(exp_num) + '_exp.res', 'wb') as f:
+        pickle.dump(return_dict.values(), f)
+    print('successful')
 
 
 if __name__ == '__main__':
-    a = [1, 2, 4]
-    b = [2, 1, 3]
-    Metric.NDCG(a, b)
+    parser = argparse.ArgumentParser('')
+    parser.add_argument('--exp_num', default=100, type=int)
+    parser.add_argument('--sample_num', default=1000, type=int)
+    args = parser.parse_args()
     set_random_seed(100)
     main()

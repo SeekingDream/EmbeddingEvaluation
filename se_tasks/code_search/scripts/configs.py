@@ -36,7 +36,7 @@ def config_JointEmbeder():
         #training_params            
             'batch_size': 64,
             'chunk_size':200000,
-            'nb_epoch': 300,
+            'nb_epoch': 10,
             #'optimizer': 'adam',
             'learning_rate':2.08e-4,
             'adam_epsilon':1e-8,

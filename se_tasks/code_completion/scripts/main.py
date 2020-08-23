@@ -18,7 +18,6 @@ from se_tasks.code_completion.scripts.util import adjust_learning_rate
 from se_tasks.code_completion.scripts.model import Word2vecPredict
 
 
-
 def preprocess_data():
     print("===> creating vocabs ...")
     train_path = args.train_data
@@ -109,12 +108,18 @@ def main():
 
     print('training dataset size is ', train_loader.n_samples)
     t1 = datetime.datetime.now()
-    for epoch in range(1, args.epochs):
+    time_cost = None
+    for epoch in range(1, args.epochs + 1):
         st = datetime.datetime.now()
         train(train_loader, model, criterion, optimizer)
-        res = test(val_loader, model, criterion)
         ed = datetime.datetime.now()
-        print(epoch, 'cost time', ed -st, 'accuracy is', res.item())
+        if time_cost is None:
+            time_cost = ed - st
+        else:
+            time_cost += (ed - st)
+        res = test(val_loader, model, criterion)
+        print(epoch, 'cost time', ed - st, 'accuracy is', res.item())
+    print('time cost', time_cost / args.epochs)
     t2 = datetime.datetime.now()
 
     weight_save_model = os.path.join('se_tasks/code_completion', args.weight_name)

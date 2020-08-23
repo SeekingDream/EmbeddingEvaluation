@@ -54,8 +54,8 @@ def generate_new_vec(
 
 
 def main():
-    VEC_DIR = '/glusterfs/data/sxc180080/EmbeddingEvaluation/embedding_vec/'
-    OUT_DIR = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/'
+    VEC_DIR = '/glusterfs/dataset/sxc180080/EmbeddingEvaluation/embedding_vec/'
+    OUT_DIR = '/glusterfs/dataset/sxc180080/EmbeddingEvaluation/vec/'
     if not os.path.isdir(OUT_DIR):
         os.mkdir(OUT_DIR)
     vec_type = '100_2/'

@@ -38,15 +38,15 @@ def transfer_data(dataset):
 
 
 def main():
-    data = torch.load('se_tasks/clone_detection/data/clone.data')
+    data = torch.load('se_tasks/clone_detection/dataset/clone.dataset')
     data = transfer_data(data)
     train_data, test_data = train_test_split(data, test_size=0.2,)
-    with open('se_tasks/clone_detection/data/train.pkl', 'wb') as f:
+    with open('se_tasks/clone_detection/dataset/train.pkl', 'wb') as f:
         pickle.dump(train_data, f)
-    with open('se_tasks/clone_detection/data/test.pkl', 'wb') as f:
+    with open('se_tasks/clone_detection/dataset/test.pkl', 'wb') as f:
         pickle.dump(test_data, f)
 
-    print('successful get the data')
+    print('successful get the dataset')
 
 
 if __name__ == '__main__':

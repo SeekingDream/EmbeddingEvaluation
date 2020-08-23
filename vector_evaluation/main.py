@@ -4,7 +4,7 @@ from vector_evaluation.SemanticMetric import SemanticCosine
 import joblib
 
 # vec_dir = '/glusterfs/data/wei/EmbeddingData/embedding_vec/100_2/'
-vec_dir = '/home/yxl190090/data/EmbeddingEvaluation/embedding_vec/100_2/'
+vec_dir = '/home/yxl190090/dataset/EmbeddingEvaluation/embedding_vec/100_2/'
 dict_list, vec_list = {}, {}
 
 

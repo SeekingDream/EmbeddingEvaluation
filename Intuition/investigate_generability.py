@@ -2,7 +2,7 @@ import torch
 from gensim.models.word2vec import Word2Vec
 from gensim.models import KeyedVectors
 
-vec_dir = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/100_2/'
+vec_dir = '/glusterfs/dataset/sxc180080/EmbeddingEvaluation/vec/100_2/'
 
 
 def dict2list(w2i):

@@ -126,7 +126,7 @@ def train_model(args):
     config = getattr(configs, 'config_' + args.model)()
     if args.automl:
         config.update(vars(args))
-    print(config)
+
 
     ###############################################################################
     # Load dataset
@@ -202,9 +202,10 @@ def train_model(args):
     # Training Process
     ###############################################################################    
     n_iters = len(data_loader)
-    #itr_global = args.reload_from + 1
+
+    time_cost = None
     for epoch in range(int(args.reload_from / n_iters) + 1, config['nb_epoch'] + 1):
-        itr_start_time = time.time()
+        st_time = datetime.now()
         losses = []
         for batch_data in data_loader:
             model.train()
@@ -222,22 +223,11 @@ def train_model(args):
             scheduler.step()
             model.zero_grad()
             losses.append(loss.item())
-
-        # if epoch % args.log_every == 0:
-        #     elapsed = time.time() - itr_start_time
-        #     logger.info('epo:[%d/%d] itr:[%d/%d] step_time:%ds Loss=%.5f' %
-        #                 (epoch, config['nb_epoch'], itr_global % n_iters, n_iters, elapsed, np.mean(losses)))
-        #     if tb_writer is not None:
-        #         tb_writer.add_scalar('loss', np.mean(losses), itr_global)
-        #     if IS_ON_NSML:
-        #         summary = {"summary": True, "scope": locals(), "step": itr_global}
-        #         summary.update({'loss': np.mean(losses)})
-        #         nsml.report(**summary)
-        #
-        #     losses = []
-        #     itr_start_time = time.time()
-        #itr_global = itr_global + 1
-
+        ed_time = datetime.now()
+        if time_cost is None:
+            time_cost = (ed_time - st_time)
+        else:
+            time_cost += (ed_time - st_time)
         if epoch % args.valid_every == 0:
             # logger.info("validating..")
             valid_result = validate(valid_set, model, 10000, 1, config['sim_measure'])
@@ -250,13 +240,7 @@ def train_model(args):
             #     summary = {"summary": True, "scope": locals(), "step": itr_global}
             #     summary.update(valid_result)
             #     nsml.report(**summary)
-
-        # if epoch % args.save_every == 0:
-        #     ckpt_path = f'./output/{args.model}/{args.dataset}/models/step{itr_global}.h5'
-        #     save_model(model, ckpt_path)
-        #     if IS_ON_NSML:
-        #         nsml.save(checkpoint=f'model_step{itr_global}')
-        #
+    print('cost time', time_cost / (config['nb_epoch'] - int(args.reload_from / n_iters)))
 
 
 def validate(valid_set, model, pool_size, K, sim_measure):

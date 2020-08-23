@@ -13,7 +13,7 @@ def dict2list(word2index):
 
 
 def main():
-    VEC_DIR = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/100_2'
+    VEC_DIR = '/glusterfs/dataset/sxc180080/EmbeddingEvaluation/vec/100_2'
     dict_list, vec_list = [], []
     file_list = []
     for vec_file in os.listdir(VEC_DIR):

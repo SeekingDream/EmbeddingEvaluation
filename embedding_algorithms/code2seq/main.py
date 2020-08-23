@@ -27,17 +27,17 @@ def main():
 
     parser.add_argument("--datapath",
                         default='../../dataset/java-small-code2seq/tk.pkl',
-                        help="path of input data")
+                        help="path of input dataset")
     parser.add_argument("--trainpath",
                         default='../../dataset/java-small-code2seq/train.pkl',
-                        help="path of train data")
+                        help="path of train dataset")
     parser.add_argument("--validpath",
                         default='../../dataset/java-small-code2seq/test.pkl',
-                        help="path of valid data")
+                        help="path of valid dataset")
     parser.add_argument("--savename", default="",
                         help="name of saved model")
     parser.add_argument("--max_size", type=int, default=None,
-                        help="size of train data")
+                        help="size of train dataset")
     parser.add_argument("--context_length", type=int, default=200,
                         help="length of context")
     parser.add_argument("--terminal_length", type=int, default=5,

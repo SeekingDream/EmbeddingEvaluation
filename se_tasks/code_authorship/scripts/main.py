@@ -122,20 +122,26 @@ def main():
         criterion = criterion.cuda()
 
     # training and testing
-    t1 = datetime.datetime.now()
+
     acc_curve = []
+    time_cost = None
     for epoch in tqdm(range(1, args.epochs + 1)):
         st = datetime.datetime.now()
         adjust_learning_rate(args.lr, optimizer, epoch)
         train_model(train_loader, model, criterion, optimizer)
-        res = test_model(val_loader, model, criterion)
         ed = datetime.datetime.now()
+        if time_cost is None:
+            time_cost = ed - st
+        else:
+            time_cost += (ed - st)
+
+        res = test_model(val_loader, model, criterion)
+
         print(epoch, ' epoch cost time', ed - st, 'accuracy is', res.item())
         acc_curve.append(res.item())
 
-    # plt.plot(acc_curve)
-    # plt.show()
-    t2 = datetime.datetime.now()
+    print('train cost', time_cost / args.epochs)
+
     save_name = 'se_tasks/code_authorship/result/' + args.experiment_name + '.h5'
     res = {
         'word2index': d_word_index,

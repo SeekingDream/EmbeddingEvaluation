@@ -24,7 +24,7 @@ def load_data(train_file, val_file, word2index, batch_size, max_num):
     val_data = tokensize_dataset(val_file, word2index, max_num)
     train_loader = DataLoader(train_data, batch_size=batch_size, collate_fn=my_collate_fn)
     val_loader = DataLoader(val_data, batch_size=batch_size, collate_fn=my_collate_fn)
-    print('load the dataset, train size', len(train_data),'test data size', len(val_data))
+    print('load the dataset, train size', len(train_data),'test dataset size', len(val_data))
     return train_loader, val_loader
 
 
@@ -123,20 +123,23 @@ def main(arg_set):
         weight_decay=arg_set.weight_decay
     )
     criterion = nn.CrossEntropyLoss()  #nn.MSELoss()
-    # device = torch.device(int(arg_set.device))
-    # device = torch.device(args.device)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
     acc_curve = []
+    train_time = None
     for epoch in range(1, arg_set.epochs + 1):
         st = datetime.datetime.now()
         train_model(train_loader, model, criterion, optimizer, device)
-        res = test_model(val_loader, model, device)
         ed = datetime.datetime.now()
+        if train_time is None:
+            train_time = ed - st
+        else:
+            train_time = train_time + (ed - st)
+        res = test_model(val_loader, model, device)
         print(epoch, ' epoch cost time', ed - st, 'result is', res)
         acc_curve.append(res)
-
+    print('everage train cost', train_time / arg_set.epochs)
     save_name = arg_set.res_dir + arg_set.experiment_name + '.h5'
     res = {
         'word2index': d_word_index,
@@ -155,8 +158,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--embed_dim', default=100, type=int, metavar='N', help='embedding size')
     parser.add_argument('--embed_path', type=str, default='../../../vec/100_2/Word2VecEmbedding0.vec')
-    parser.add_argument('--train_data', type=str, default='../data/train.pkl')
-    parser.add_argument('--test_data', type=str, default='../data/test.pkl')
+    parser.add_argument('--train_data', type=str, default='../dataset/train.pkl')
+    parser.add_argument('--test_data', type=str, default='../dataset/test.pkl')
     parser.add_argument('--embed_type', type=int, default=0, choices=[0, 1, 2])
     parser.add_argument('--experiment_name', type=str, default='code2vec')
     parser.add_argument('--device', type=int, default=7)
