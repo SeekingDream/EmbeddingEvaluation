@@ -6,12 +6,14 @@ import random
 import warnings
 import argparse
 import pickle
+import os
+from scipy import stats
 
 import multiprocessing
 from multiprocessing import Manager
 warnings.filterwarnings('ignore')
 
-from utils import set_random_seed
+from utils import set_random_seed, BASEDICT
 from Intuition.investigate_generability import constructModel, dict2list
 from embedding_algorithms.word2vec import Word2VecEmbedding
 
@@ -131,7 +133,7 @@ class GroundTruth:
     embed_num = 10
 
     def get_tk_frec(self):
-        mv = torch.load('wv_fre.fcy')
+        mv = torch.load('./wv_fre.fcy')
         vocab = mv.vocab
         frec = {}
         for k in self.word2index:
@@ -149,11 +151,14 @@ class GroundTruth:
         self.thresh = thresh
         self.word2index, _ = torch.load(vec_dir + 'ori_code2seq.vec')
         self.index2word = dict2list(self.word2index)
+        self.top_fre = top_fre
+        if top_fre is not None:
+            self.frequency, self.sorted_fre = self.get_tk_frec()
+            self.sorted_fre = self.sorted_fre[-top_fre:]
+
         self.w2v_list = []
         self.vec_list = []
-        self.frequency, self.sorted_fre = self.get_tk_frec()
-        self.sorted_fre = self.sorted_fre[-top_fre:]
-
+        self.src_index, self.src_tk = None, None
         self.token_num, self.vec_dim = len(self.word2index), dim
         for file_name in self.embed:
             if file_name == 'random':
@@ -163,6 +168,56 @@ class GroundTruth:
             self.vec_list.append(vec)
             m = constructModel(vec, self.word2index, self.index2word)
             self.w2v_list.append(m)
+
+    def get_simalarity_index(self, sample_num):
+        #src_i = np.random.randint(0, len(self.sorted_fre), sample_num)
+        #src_i = [self.sorted_fre[i][0] for i in src_i]
+
+        src_tk = [self.index2word[i[0]] for i in self.sorted_fre]
+        sample_index = np.random.choice(
+            range(0, len(src_tk) - 1), size=sample_num, replace=False)
+        src_tk = list(np.array(src_tk)[sample_index])
+
+        res = []
+        for m_id, w2v_model in enumerate(self.w2v_list):
+            model_sim = []
+            st = datetime.datetime.now()
+            for _, s_tk in enumerate(src_tk):
+                (t, s) = w2v_model.wv.most_similar(s_tk, topn=1)[0]
+                # if self.word2index[t] not in possible_index:
+                #     possible_index.append(self.word2index[t])
+                model_sim.append((t, s))
+            ed = datetime.datetime.now()
+            res.append(model_sim)
+            print(ed - st)
+        return src_tk, res
+
+    def update(self, sample_num):
+        src_tk, offline_res = self.get_simalarity_index(sample_num)
+        offline_res = offline_res
+        sim_mat = np.zeros([sample_num, len(self.w2v_list)])
+        sim_token = []
+        for i in range(sample_num):
+            tmp = []
+            for j, _ in enumerate(offline_res):
+                sim_mat[i, j] = offline_res[j][i][1]
+                tmp.append(offline_res[j][i][0])
+            sim_token.append(tmp)
+        kde_list = []
+        for i in range(len(self.w2v_list)):
+            gkde = stats.gaussian_kde(sim_mat[:, i])
+            kde_list.append(gkde)
+
+        mean_val = np.mean(sim_mat, axis=0)
+        mean_val = np.tile(mean_val, (sample_num, 1))
+        std_val = np.std(sim_mat, axis=0)
+        std_val = np.tile(std_val, (sample_num, 1))
+        self.src_tk = src_tk
+        self.sim_mat = sim_mat
+        self.sim_token = sim_token
+        self.mean_val = mean_val
+        self.std_val = std_val
+        self.kde_list = kde_list
 
     def _normalize_truth(self, norm_type):
         if norm_type == 0:
@@ -177,45 +232,64 @@ class GroundTruth:
         score = np.average(norm_truth, axis=0)
         return score
 
+    def loacte_correct(self, base, candidate, sample_num):
+        sel_index = np.random.choice(
+            range(0, len(self.src_tk)), size=sample_num, replace=False)
+        src_tk = [self.src_tk[i] for i in sel_index]
+
+        src_index = [self.word2index[tk] for tk in src_tk]
+        tgt_tk = [self.sim_token[i][base] for i in sel_index]
+        score = np.zeros([sample_num, 2 + len(candidate)])
+        score[:, 0] = self.sim_mat[sel_index, base]
+        score[:, 1] = self.sim_mat[sel_index, 0]
+
+        for j, c in enumerate(candidate):
+            tgt_index = [self.word2index[tk] for tk in tgt_tk]
+            src_vec = self.vec_list[j][src_index]
+            tgt_vec = self.vec_list[j][tgt_index]
+            for iii, v in enumerate(src_vec):
+                u = tgt_vec[iii:iii + 1]
+                score[iii, j + 2] = self.w2v_list[j].wv.cosine_similarities(v, u)
+        res = self.detector(score, base, candidate)
+        return res, src_tk, tgt_tk
+
     def calculate_score(self, base, candidate, sample_num):
-        src_i = np.random.randint(0, len(self.sorted_fre), sample_num)
-        src_i = [self.sorted_fre[i][0] for i in src_i]
-        src_tk = [self.index2word[i] for i in src_i]
-        tar_tk = []
-        sim_mat = np.zeros([sample_num, 2 + len(candidate)])
-        for i, s_tk in enumerate(src_tk):
-            (t, s) = self.w2v_list[base].wv.most_similar(s_tk, topn=1)[0]
-            tar_tk.append(t)
-            sim_mat[i, 0] = s
-            s_vec = self.vec_list[0][self.word2index[s_tk]]
-            t_index = self.word2index[t]
-            t_vec = self.vec_list[0][t_index:t_index + 1]
-            sim = self.w2v_list[0].wv.cosine_similarities(s_vec, t_vec)[0]
-            sim_mat[i, 1] = sim
+        sel_index = np.random.choice(
+             range(0, len(self.src_tk)), size=sample_num, replace=False)
+        src_tk = [self.src_tk[i] for i in sel_index]
 
-        tar_i = [self.word2index[t] for t in tar_tk]
-        for i, t_i in enumerate(tar_i):
-            for j, c in enumerate(candidate):
-                s_vec = self.vec_list[c][src_i[i]]
-                t_vec = self.vec_list[c][t_i: t_i+1]
-                sim = self.w2v_list[c].wv.cosine_similarities(s_vec, t_vec)[0]
-                sim_mat[i, j + 2] = sim
-        v = self.detector(sim_mat)
-        return v / sample_num
+        src_index = [self.word2index[tk] for tk in src_tk]
+        tgt_tk = [self.sim_token[i][base] for i in sel_index]
+        score = np.zeros([sample_num, 2 + len(candidate)])
+        score[:, 0] = self.sim_mat[sel_index, base]
+        score[:, 1] = self.sim_mat[sel_index, 0]
 
-    def detector(self, sim_mat):
+        for j, c in enumerate(candidate):
+            tgt_index = [self.word2index[tk] for tk in tgt_tk]
+            src_vec = self.vec_list[j][src_index]
+            tgt_vec = self.vec_list[j][tgt_index]
+            for iii, v in enumerate(src_vec):
+                u = tgt_vec[iii:iii + 1]
+                score[iii, j + 2] = self.w2v_list[j].wv.cosine_similarities(v, u)
+        res = self.detector(score, base, candidate)
+        return np.sum(res) / sample_num
+
+    def detector(self, sim_mat, base, candidate):
         base_score = sim_mat[:, 0]
         rnd_score = sim_mat[:, 1]
-        average = (base_score + rnd_score).reshape([-1, 1]) / 2
         cand_score = sim_mat[:, 2:]
+
+        like_hood = np.zeros_like(cand_score)
+        rand_hood = np.zeros_like(cand_score)
         sampel_num, candiate_num = cand_score.shape
-        # if det_type == 0:
-        #     mean, std = np.mean(cand_score, axis=1), np.std(cand_score, axis=1)
-        #     v = (base_score - mean) / (std + 1e-8)
-        #     res = np.sum(abs(v) < self.thresh, dtype=np.float)
-        # elif det_type == 1:
-        res = np.sum(np.sum(cand_score > average, axis=1) > (candiate_num/2))
-        return res
+
+        for i, c in enumerate(candidate):
+            like_hood[:, i] = self.kde_list[c].evaluate(cand_score[:, i])
+            rand_hood[:, i] = self.kde_list[0].evaluate(cand_score[:, i])
+        pred = (like_hood / (like_hood + rand_hood + 1e-9) > 0.5)
+        pred = np.sum(pred, axis=1)
+
+        return pred > (candiate_num/2)
 
 
 def experiment(instance, candidate_num, exp_num, sample_num, return_dict):
@@ -223,7 +297,8 @@ def experiment(instance, candidate_num, exp_num, sample_num, return_dict):
     st_time = datetime.datetime.now()
     for _ in range(exp_num):
         candidate = np.random.choice(
-             range(instance.embed_num), size=candidate_num, replace=False)
+            range(0, instance.embed_num), size=candidate_num, replace=False)
+        #candidate = np.arange(1, instance.embed_num)
         candidate_score = np.zeros([candidate_num])
         truth_score = instance.norm_score[candidate]
         for j, base in enumerate(candidate):
@@ -235,42 +310,68 @@ def experiment(instance, candidate_num, exp_num, sample_num, return_dict):
         pred_sort = list(np.argsort(candidate_score * -1))
         metric.update(pred_sort, truth_sort)
     ed_time = datetime.datetime.now()
+    print(candidate_num, 'cost time:', ed_time - st_time)
     time_cost = (ed_time - st_time) / (exp_num * candidate_num)
     metric.produce_final(exp_num)
     return_dict[candidate_num] = [metric, time_cost, candidate_num]
 
 
-def main():
-    # with open('exp.res', 'rb') as f:
-    #     return_dict = pickle.load(f)
-
+def construct_instance(dim, thresh, top_fre):
     vec_dir = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/100_2/'
-    m = GroundTruth(vec_dir, dim=100, thresh=1, top_fre=10000)
-    exp_num = args.exp_num
-    sample_num = args.sample_num
+    m = GroundTruth(vec_dir, dim=dim, thresh=thresh, top_fre=top_fre)
+    return m
+
+
+def multpile_precess(m, exp_num, sample_num):
     manager = Manager()
     return_dict = manager.dict()
     jobs = []
-    for candidate_num in range(3, 10):
+    for candidate_num in range(5, 11):
         p = multiprocessing.Process(
             target=experiment,
             args=(m, candidate_num, exp_num, sample_num, return_dict)
         )
         jobs.append(p)
         p.start()
-
     for proc in jobs:
         proc.join()
-    print(return_dict.values())
-    with open(str(exp_num) + '_exp.res', 'wb') as f:
+    with open('./res/' + str(exp_num) + '_' + str(sample_num) + '_exp.res', 'wb') as f:
         pickle.dump(return_dict.values(), f)
+
+
+def single_precess(m, exp_num, sample_num):
+    return_dict = dict()
+    for candidate_num in range(5, 11):
+        experiment(m, candidate_num, exp_num, sample_num, return_dict)
+        with open('./res/' + str(exp_num) + '_' + str(sample_num) + '_exp.res', 'wb') as f:
+            pickle.dump(return_dict, f)
+
+
+def main():
+    vec_dir = '/glusterfs/data/sxc180080/EmbeddingEvaluation/vec/100_2/'
+    m = GroundTruth(vec_dir, dim=100, thresh=1, top_fre=30000)
+    m.update(20000)
+    exp_num = args.exp_num
+    sample_num = args.sample_num
+
+    use_multiple = True
+    if use_multiple:
+        multpile_precess(m, exp_num, sample_num)
+    else:
+        single_precess(m, exp_num, sample_num)
     print('successful')
 
 
 if __name__ == '__main__':
+    if not os.path.isdir('./res'):
+        os.mkdir('./res')
+
     parser = argparse.ArgumentParser('')
-    parser.add_argument('--exp_num', default=100, type=int)
-    parser.add_argument('--sample_num', default=1000, type=int)
+    parser.add_argument('--exp_num', default=500, type=int)
+    parser.add_argument('--sample_num', default=1500, type=int)
     args = parser.parse_args()
     set_random_seed(100)
+    st_time = datetime.datetime.now()
     main()
+    ed_time = datetime.datetime.now()
+    print(ed_time - st_time)

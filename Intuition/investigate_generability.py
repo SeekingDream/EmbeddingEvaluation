@@ -31,10 +31,9 @@ def constructDict(word2index):
 
 
 def constructModel(vec, word2index, index2word):
-    m = Word2Vec()
+    m = Word2Vec(workers=10)
     m.wv.vectors = vec
     m.wv.vocab = constructDict(word2index)
-
     m.wv.index2word = list_dict(index2word)
     return m
 
